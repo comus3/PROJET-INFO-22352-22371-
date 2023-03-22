@@ -17,7 +17,7 @@ def requestSubscribeStringGenerator(port):
     request_subscribe = {
         "request": "subscribe",
         "port": port,
-        "name": "¯\_(^__^)_/¯",
+        "name": "BOSS",#"name": "¯\_(^__^)_/¯",
         "matricules": ["22352", "22371"]
     }
     req = json.dumps(request_subscribe)
