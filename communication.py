@@ -22,9 +22,16 @@ def connecter():
     except:
         print("erreur connection non reussie")
     try:
-        s.send(requestSubscribeStringGenerator(port))
+        with socket.socket() as s:
+            s.send(requestSubscribeStringGenerator(port))
+            response = s.recv(2048).decode()
     except:
         print("subscribe raté")
+    if response != "ok":
+        print("error no ok response from server")
+    
+
+    
     
     
 connecter()
