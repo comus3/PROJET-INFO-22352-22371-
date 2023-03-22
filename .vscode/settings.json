@@ -1,0 +1,7 @@
+{
+    "python.testing.pytestArgs": [
+        "PROJET-INFO-22352-22371-"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}
