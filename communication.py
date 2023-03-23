@@ -22,6 +22,9 @@ def connecter():
     s = socket.socket()
     socketList.append(s)
     port = int(input("Entrez le port d'écoute de l'IA actuelle:   "))
+    modele = str(input("quel modele d'ia souhaitez vous utilisez? (blank for default)      "))
+    if modele == None:
+        modele = "manuel"
     try:
         s.connect((adress,portMachine))
         s.send(requestSubscribeStringGenerator(port))
@@ -31,7 +34,7 @@ def connecter():
         return 0
     rep = json.loads(response)
     if rep["response"] == "ok":
-        ia = IA(s,port,adress)
+        ia = IA(s,port,adress,modele)
         new_thread = Thread(target=life,args=(ia,))
         new_thread.start()
         print('réponse ok recue')
@@ -56,9 +59,7 @@ def life(ia):#################################################1) Ecouter 2) JOUe
             except Exception as e:
                 #print("message arrival error!       ", e)
                 continue
-            
-                
-        jsonEncodeAndSend(nextMove)
+            jsonEncodeAndSend(nextMove)
 
     
     

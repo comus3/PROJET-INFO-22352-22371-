@@ -1,6 +1,13 @@
 import socket
 import json
 
+####    ---FAIT---  ###### quelques fonctions de comm
+####    ---A FAIRE--- #### 
+# Fonction qui calcule le/les chemins vers trésor avec map comme arg
+# fonction random qui prend en param un nombre n(nombre de choix) et rend un chiffre compris entre 0 et n-1
+
+
+
 responseToPing ={
        "response": "pong"
     }
