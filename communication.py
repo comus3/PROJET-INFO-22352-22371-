@@ -3,7 +3,7 @@ import socket
 import json
 from threading import Thread
 from main import IA
-
+from utils import requestSubscribeStringGenerator,jsonEncodeAndSend,respondToPing
 
 portMachine = 3000
 socketList = []
@@ -13,31 +13,9 @@ responseToPing ={
 
 
 
-def requestSubscribeStringGenerator(port):
-    request_subscribe = {
-        "request": "subscribe",
-        "port": port,
-        "name": "BOSS",#"name": "¯\_(^__^)_/¯",
-        "matricules": ["22352", "22371"]
-    }
-    req = json.dumps(request_subscribe)
-    req = req.encode()
 
-    return req
 
-def jsonEncodeAndSend(message,s):
-    message = json.dumps(message)
-    message = message.encode()
-    send =False
-    while send:
-        try:
-            s.send(message)
-            send = False
-        except Exception as e:
-            print("envoi échoué: ", e)
 
-def respondToPing(socket):
-    jsonEncodeAndSend(responseToPing,socket)
             
 
 def connecter():
@@ -66,18 +44,19 @@ def life(ia):#################################################1) Ecouter 2) JOUe
         while read:
             try:
                 rep = ia.socket.recv(2048)
+                msg = json.loads(rep)
+                if msg["request"] == "play":
+                    nextMove = ia.think(msg["state"])
+                    read = False
+                    print("message de request recu !     "  + str(msg))
+                elif msg["request"] == "ping":
+                    respondToPing(ia.socket)
+                else:
+                    print('message arrivé différent de play request ou ping!')
             except Exception as e:
                 #print("message arrival error!       ", e)
                 continue
-            msg = json.loads(rep)
-            if msg["request"] == "play":
-                nextMove = ia.think(msg["state"])
-                read = False
-                print("message de request recu !     "  + str(msg))
-            elif msg["request"] == "ping":
-                respondToPing(ia.socket)
-            else:
-                print('message arrivé différent de play request ou ping!')
+            
                 
         jsonEncodeAndSend(nextMove)
 
@@ -90,8 +69,9 @@ def life(ia):#################################################1) Ecouter 2) JOUe
     
 
     
-    
+#################################################################       ACTOIN      #############################################
+
+
 #adress = str(input("Entrez l'adresse i.p. du serveur:   "))
 adress = "localhost"
-connecter()
 connecter()
