@@ -8,11 +8,8 @@ listeIA = []
 
 
 class IA:
-    def __init__(self,s,port,adress,modele):
+    def __init__(self,modele):
         self.active = True
-        self.socket = s
-        self.port = port
-        self.adress = adress
         if modele == "manuel":
             modele = Manuel([])
             self.modele = modele
