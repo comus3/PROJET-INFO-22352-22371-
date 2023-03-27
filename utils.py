@@ -40,5 +40,3 @@ def jsonEncodeAndSend(message,s):
             send = False
         except Exception as e:
             print("envoi échoué: ", e)
-
-

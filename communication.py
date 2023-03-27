@@ -2,10 +2,12 @@
 import socket
 import json
 from threading import Thread
-from main import IA
+from main import IA#, returnListeIA
 from utils import requestSubscribeStringGenerator,jsonEncodeAndSend
+import sys
 
 portMachine = 3000
+read_Terminal = True
 socketList = []
 responseToPing ={
        "response": "pong"
@@ -16,9 +18,29 @@ responseToPing ={
 
 
 
-            
+def terminal():
+    global read_Terminal
+    print('terminal ACTIVE')
+    while read_Terminal:
+        command_list = ['/connect','/abandon','/exit']
+        user_input = str(input(''))
+        if user_input == command_list[0]:
+            read_Terminal = False
+            if connecter() == 0:
+                read_Terminal = True
+        elif user_input == command_list[1]:
+            continue
+            #for John in returnListeIA():
+            #    John.kill()
+        elif user_input == command_list[2]:
+            sys.exit()
+        else:
+            print('commande non reconnue')
+
+                
 
 def connecter():
+    global read_Terminal
     s = socket.socket()
     port = int(input("Entrez le port d'écoute de l'IA actuelle:   "))
     modele = str(input("quel modele d'ia souhaitez vous utilisez? (blank for default)      "))
@@ -65,6 +87,7 @@ def life(ia,adresse,port):#################################################1) Ec
                             print('message arrivé différent de play request ou ping!')
                 except socket.timeout:
                     continue
+
                 
     
     
@@ -80,4 +103,6 @@ def life(ia,adresse,port):#################################################1) Ec
 
 #adress = str(input("Entrez l'adresse i.p. du serveur:   "))
 adress = "localhost"
-connecter()
+terminal_Thread = Thread(target=terminal)
+terminal_Thread.start()
+

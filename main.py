@@ -4,11 +4,16 @@
 #chaque objet ia possede uun attribut modèle qui pinte vers la fonction a utiliser pour calculer le next move
 #ecdrire le premier modèle
 #### ---A FAIRE--- ######
+
+
 listeIA = []
 
+def returnListeIA():
+    return listeIA
 
 class IA:
     def __init__(self,modele):
+        global listeIA
         self.active = True
         if modele == "manuel":
             modele = Manuel([])
@@ -18,6 +23,8 @@ class IA:
         print("je suis l'ia associée au port" + self.port)
     def think(self,msg):
         return self.modele.nextMove(msg)
+    def kill(self):
+        self.active = False
         
         
 
