@@ -45,6 +45,7 @@ def life(ia,adresse,port):#################################################1) Ec
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(('127.0.0.1', port))
     s.connect((adresse,portMachine))
+    s.listen()
     while ia.active:
         read = True
         while read:
@@ -54,9 +55,11 @@ def life(ia,adresse,port):#################################################1) Ec
                 while not finished:
                     data = s.recv(1024)
                     chunks.append(data)
-                    print(data)
-                    finished = data == b' '
-                msg = json.loads(b' '.join(chunks).decode())
+                    try:
+                        msg = json.loads(b' '.join(chunks).decode())
+                        finished = True
+                    except:
+                        continue
                 print(msg)
                 if msg["request"] == "play":
                     nextMove = ia.think(msg["state"])

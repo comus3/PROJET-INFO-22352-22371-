@@ -20,7 +20,7 @@ class IA:
         return self.modele.nextMove(msg)
         
         
-    
+
 ####################### MODèLES IA  ################################
 
 class Manuel:
@@ -29,3 +29,4 @@ class Manuel:
         self.history = []
     def nextMove(status):
         return input("reponse demandée! message d'orignie:  "+status)
+    
