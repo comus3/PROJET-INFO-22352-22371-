@@ -56,7 +56,7 @@ def connecter():
     rep = json.loads(response.decode())
     if rep["response"] == "ok":
         ia = IA(modele)
-        new_thread = Thread(target=life,args=(ia,adress,port,))
+        new_thread = Thread(target=life,args=(ia,port))
         new_thread.start()
         s.close()
         print('réponse ok recue')
@@ -64,7 +64,7 @@ def connecter():
     s.close()
     print("error no ok response from server")
 
-def life(ia,adresse,port):#################################################1) Ecouter 2) JOUeR 3) parler 4) recommence:
+def life(ia,port):#################################################1) Ecouter 2) JOUeR 3) parler 4) recommence:
     global read_Terminal
     with socket.socket() as s:
         s.bind(('', port))

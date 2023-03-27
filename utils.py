@@ -41,3 +41,18 @@ def jsonEncodeAndSend(message,s):
             send = False
         except Exception as e:
             print("envoi échoué: ", e)
+
+def isSameTile(t1, t2):
+    for _ in range(4):
+        if t1 == t2:
+            return True
+        t2 = turn_tile(t2)
+
+    return False
+def turn_tile(tile):
+    #res = copy.deepcopy(tile)
+    res["N"] = tile["E"]
+    res["E"] = tile["S"]
+    res["S"] = tile["W"]
+    res["W"] = tile["N"]
+    return res
