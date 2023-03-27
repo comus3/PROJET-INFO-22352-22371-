@@ -6,7 +6,7 @@ import json
 # Fonction qui calcule le/les chemins vers trésor avec map comme arg
 # fonction random qui prend en param un nombre n(nombre de choix) et rend un chiffre compris entre 0 et n-1
 
-listnames = ["¯\_(^__^)_/¯","top",'nickel','super','ultra']
+listnames = ["thomas","top",'nickel','super','ultra','bazarDuGrenier','leLApib','Bat','LEPHOENIX','equateur','tongo','tango','charlie','hebdo','lemecaudessusdemoiestnul','hexadecimal']
 index = 0
 
 responseToPing ={
@@ -17,13 +17,14 @@ responseToPing ={
 
 def requestSubscribeStringGenerator(port,):
     global index
+    matricule2 = str(22371 + index)
     request_subscribe = {
         "request": "subscribe",
         "port": port,
         "name": listnames[index],
-        "matricules": ["22352", "22371"]
+        "matricules": ["22352", matricule2]
     }
-    index = (index+1)%4
+    index = index+1
     req = json.dumps(request_subscribe)
     req = req.encode()
 

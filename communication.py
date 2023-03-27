@@ -38,7 +38,6 @@ def terminal():
             print('commande non reconnue')
 
                 
-
 def connecter():
     global read_Terminal
     s = socket.socket()
@@ -66,27 +65,30 @@ def connecter():
     print("error no ok response from server")
 
 def life(ia,adresse,port):#################################################1) Ecouter 2) JOUeR 3) parler 4) recommence:
-    while ia.active:
-        with socket.socket() as s:
-                s.bind(('', port))
-                s.listen()
-                s.settimeout(5)
-                try:
-                    client, address = s.accept()
-                    with client:
-                        msg = json.loads(client.recv(2048).decode())
-                        print('message reçu! DATA:  ' + str(msg))
-                        if msg["request"] == "play":
-                            nextMove = ia.think(msg["state"])
-                            print("message de request play recu ")
-                            client.send(nextMove)
-                        elif msg["request"] == "ping":
-                            client.send(json.dumps(responseToPing).encode())
-                            print("requested ping... responding")
-                        else:
-                            print('message arrivé différent de play request ou ping!')
-                except socket.timeout:
-                    continue
+    global read_Terminal
+    with socket.socket() as s:
+        s.bind(('', port))
+        s.listen()
+        #s.settimeout(5)
+        while ia.active:
+            try:
+                client, address = s.accept()
+                with client:
+                    msg = json.loads(client.recv(20048).decode())
+                    print("message reçu!... Qu'en faire?")
+                    if msg["request"] == "play":
+                        read_Terminal = False
+                        nextMove = ia.think(msg["state"])
+                        read_Terminal = True
+                        client.send(nextMove)
+                    elif msg["request"] == "ping":
+                        client.send(json.dumps(responseToPing).encode())
+                        print("requested ping... responding")
+                    else:
+                        print('message arrivé différent de play request ou ping!')
+            except socket.timeout:
+                continue
+
 
                 
     
