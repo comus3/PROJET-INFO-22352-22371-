@@ -9,6 +9,7 @@ from utils import isSameTile,turn_tile,random_turn_tile,showState
 #-Simulateur du jeu
 #-modele d'ia
 #testing
+#ceci est ma brainche
 
 
 listeIA = []
