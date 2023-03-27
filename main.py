@@ -1,6 +1,6 @@
 import json
 import random
-from utils import isSameTile,turn_tile,random_turn_tile,showBoard
+from utils import isSameTile,turn_tile,random_turn_tile,showState
 #### ---FAIT---    ######CREER CLASSE QUI VA CREER DES OBJETS IA, CHAQUE OBJET IA A UN ATRIBUT Active LES OBJETS SAPPELLLENT IA ET SONT RANGES DANS UNE LISTE
 #aussi un attribut socket qui est son socket
 #chaque objet ia possede uun attribut modèle qui pinte vers la fonction a utiliser pour calculer le next move
@@ -44,7 +44,7 @@ class Manuel:
     def nextMove(self,status):
         cardinaux = [False,False,False,False]
         print("status:\n")
-        showBoard(status["board"])
+        showState(status)
         user_input_orientation = str(input("orientation? (N/E/S/W... 1 et 0)   >>"))
         user_input_gate = input("which gate..?  \n>>")
         user_input_newpos = input("and new pos? \n>>")

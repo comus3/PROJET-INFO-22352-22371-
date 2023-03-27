@@ -95,6 +95,15 @@ def showBoard(board):
         mat[i + 3][j + 3] = "-"
 
     print("\n".join(["".join(line) for line in mat]))
+def showState(state):
+    print("Player:", state["players"][state["current"]])
+    print("Target:", state["target"])
+    print("Remaining:", state["remaining"])
+    print("Tile:", state["tile"])
+    print("Positions:")
+    for i, pos in enumerate(state["positions"]):
+        print(" - {}: {}".format(state["players"][i], pos))
+    showBoard(state["board"])
 
 
 
