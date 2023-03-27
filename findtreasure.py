@@ -1,6 +1,6 @@
 
 
-# j'ai tout fait dans une seul fonction contrairement au profff
+# j'ai tout fait dans une seul fonction contrairement au prof
 
 def findtreasure(plateau):
     def rdfs(i, j, chemin, visites):   #Méthode qui est utilisé Recursive Depth-first search    
