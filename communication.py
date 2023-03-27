@@ -47,7 +47,9 @@ def connecter():
         modele = "manuel"
     try:
         s.connect((adress,portMachine))
-        s.send(requestSubscribeStringGenerator(port))
+        (a,b) = requestSubscribeStringGenerator(port)
+        s.send(a)
+        name = b
         response = s.recv(2048)         
     except Exception as e:
         print("connection echouée: ", e)
@@ -55,7 +57,7 @@ def connecter():
         return 0
     rep = json.loads(response.decode())
     if rep["response"] == "ok":
-        ia = IA(modele)
+        ia = IA(modele,name)
         new_thread = Thread(target=life,args=(ia,port))
         new_thread.start()
         s.close()

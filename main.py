@@ -16,7 +16,7 @@ def returnListeIA():
     return listeIA
 
 class IA:
-    def __init__(self,modele):
+    def __init__(self,modele,name):
         global listeIA
         self.active = True
         if modele == "manuel":
@@ -24,7 +24,7 @@ class IA:
         else:
             self.modele = Manuel([])
         listeIA.append(self)
-        self.name = "IA" + str(len(listeIA))
+        self.name = name
     def __str__(self):
         print("je suis l'ia associée au port" + self.port)
     def think(self,msg):
@@ -44,7 +44,8 @@ class Manuel:
     def nextMove(self,status):
         cardinaux = [False,False,False,False]
         print("status:\n")
-        showState(status)
+        #showState(status)
+        print(str(status))
         user_input_orientation = str(input("orientation? (N/E/S/W... 1 et 0)   >>"))
         user_input_gate = input("which gate..?  \n>>")
         user_input_newpos = input("and new pos? \n>>")
