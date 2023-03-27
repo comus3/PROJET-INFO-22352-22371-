@@ -20,29 +20,52 @@ responseToPing ={
 def requestSubscribeStringGenerator(port,):
     global index
     matricule2 = str(22371 + index)
+    name = listnames[index]
     request_subscribe = {
         "request": "subscribe",
         "port": port,
-        "name": listnames[index],
+        "name": name,
         "matricules": ["22352", matricule2]
     }
     index = index+1
     req = json.dumps(request_subscribe)
     req = req.encode()
 
-    return req
+    return (req,name)
 
 
 def jsonEncodeAndSend(message,s):
-    message = json.dumps(message)
-    message = message.encode()
-    send =False
+    message = jsonEncode(message)
+    send =True
     while send:
         try:
             s.send(message)
             send = False
         except Exception as e:
             print("envoi échoué: ", e)
+def jsonEncode(message):
+    return json.dumps(message).encode()
+    
+
+
+def validMoves(status,ianame):
+    validPositions = []
+    player0or1 = 0
+    for i in range(2):
+        if status['players'][i] == ianame:
+            player0or1 = i
+    playerPos = status['positions'][player0or1]
+    if playerPos>6 and status['board'][playerPos]['N']:
+        validPositions.append(playerPos-7)
+    if playerPos<42 and status['board'][playerPos]['S']:
+        validPositions.append(playerPos+7)
+    if (playerPos%7)!=0 and status['board'][playerPos]['W']:
+        validPositions.append(playerPos-1)
+    if ((playerPos+1)%7)!=0 and status['board'][playerPos]['E']:
+        validPositions.append(playerPos+1)
+    validPositions.append(playerPos)
+    return validPositions
+        
 
 ##############################################          ALL CREDITS TO LURK1        ######################################################
 
@@ -109,3 +132,13 @@ def showState(state):
 
 
 #############################################################################################################################
+
+"""
+EXEMPLE DE STATUS
+
+{'players': ['thomas', 'top'], 'current': 0, 'positions': [0, 48], 'board': [{'N': False, 'E': True, 'S': True, 'W': False, 'item': None}, {'N': True, 'E': True, 'S': False, 'W': False, 'item': None}, {'N': False, 'E': True, 'S': True, 'W': True, 'item': 0}, {'N': True, 'E': False, 'S': True, 'W': True, 'item': 19}, {'N': False, 'E': True, 'S': True, 'W': True, 'item': 1}, {'N': False, 'E': False, 'S': True, 'W': True, 'item': 13}, {'N': False, 'E': False, 'S': True, 'W': True, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': True, 'item': 23}, {'N': False, 'E': True, 'S': False, 'W': True, 'item': None}, {'N': True, 'E': True, 'S': False, 'W': False, 'item': None}, {'N': True, 'E': True, 'S': False, 'W': False, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': False, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': False, 'item': None}, {'N': True, 'E': False, 'S': False, 'W': True, 'item': 17}, {'N': True, 'E': True, 'S': True, 'W': False, 'item': 2}, {'N': True, 'E': False, 'S': False, 'W': True, 'item': None}, {'N': True, 'E': True, 'S': True, 'W': False, 'item': 3}, {'N': True, 'E': False, 'S': True, 'W': False, 'item': None}, {'N': False, 'E': True, 'S': True, 'W': True, 'item': 4}, {'N': True, 'E': False, 'S': False, 'W': True, 'item': 16}, {'N': True, 'E': False, 'S': True, 'W': True, 'item': 5}, {'N': True, 'E': False, 'S': True, 'W': True, 'item': 22}, {'N': False, 'E': True, 'S': True, 'W': False, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': True, 'item': 18}, {'N': True, 'E': False, 'S': True, 'W': True, 'item': 20}, {'N': False, 'E': False, 'S': True, 'W': True, 'item': 15}, {'N': False, 'E': True, 'S': False, 'W': True, 'item': None}, {'N': False, 'E': True, 'S': False, 'W': True, 'item': None}, {'N': True, 'E': True, 'S': True, 'W': False, 'item': 6}, {'N': False, 'E': True, 'S': True, 
+'W': True, 'item': 21}, {'N': True, 'E': True, 'S': False, 'W': True, 'item': 7}, {'N': False, 'E': False, 'S': True, 'W': True, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': True, 'item': 8}, {'N': False, 'E': True, 'S': True, 'W': False, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': True, 'item': 9}, {'N': True, 'E': True, 'S': False, 'W': False, 'item': None}, {'N': True, 'E': False, 'S': False, 'W': True, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': False, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': False, 'item': None}, {'N': True, 'E': False, 'S': False, 'W': True, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': False, 'item': None}, {'N': False, 'E': True, 'S': False, 'W': True, 'item': None}, {'N': True, 'E': True, 'S': False, 'W': False, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': 
+False, 'item': None}, {'N': True, 'E': True, 'S': False, 'W': True, 'item': 10}, {'N': True, 'E': False, 'S': False, 'W': True, 'item': 14}, {'N': True, 'E': True, 'S': False, 'W': True, 'item': 11}, {'N': True, 'E': False, 'S': True, 'W': False, 'item': None}, {'N': True, 'E': False, 
+'S': False, 'W': True, 'item': None}], 'tile': {'N': True, 'E': False, 'S': False, 'W': True, 'item': 12}, 'target': 10, 'remaining': [4, 4]}  
+
+"""

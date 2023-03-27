@@ -1,6 +1,6 @@
 import json
 import random
-from utils import isSameTile,turn_tile,random_turn_tile,showState
+from utils import isSameTile,turn_tile,random_turn_tile,showState,validMoves
 #### ---FAIT---    ######CREER CLASSE QUI VA CREER DES OBJETS IA, CHAQUE OBJET IA A UN ATRIBUT Active LES OBJETS SAPPELLLENT IA ET SONT RANGES DANS UNE LISTE
 #aussi un attribut socket qui est son socket
 #chaque objet ia possede uun attribut modèle qui pinte vers la fonction a utiliser pour calculer le next move
@@ -8,28 +8,59 @@ from utils import isSameTile,turn_tile,random_turn_tile,showState
 #### ---A FAIRE--- ######
 #-Simulateur du jeu
 #-modele d'ia
+#testing
 
+GATES = {
+    "A": {"start": 1, "end": 43, "inc": 7},
+    "B": {"start": 3, "end": 45, "inc": 7},
+    "C": {"start": 5, "end": 47, "inc": 7},
+    "D": {"start": 13, "end": 7, "inc": -1},
+    "E": {"start": 27, "end": 21, "inc": -1},
+    "F": {"start": 41, "end": 35, "inc": -1},
+    "G": {"start": 47, "end": 5, "inc": -7},
+    "H": {"start": 45, "end": 3, "inc": -7},
+    "I": {"start": 43, "end": 1, "inc": -7},
+    "J": {"start": 35, "end": 41, "inc": 1},
+    "K": {"start": 21, "end": 27, "inc": 1},
+    "L": {"start": 7, "end": 13, "inc": 1},
+}
+DIRECTIONS = {
+    "N": {"coords": (-1, 0), "inc": -7, "opposite": "S"},
+    "S": {"coords": (1, 0), "inc": 7, "opposite": "N"},
+    "W": {"coords": (0, -1), "inc": -1, "opposite": "E"},
+    "E": {"coords": (0, 1), "inc": 1, "opposite": "W"},
+    (-1, 0): {"name": "N"},
+    (1, 0): {"name": "S"},
+    (0, -1): {"name": "W"},
+    (0, 1): {"name": "E"},
+}
 
 listeIA = []
+gateList = ["A","B","C","D","E","F","G","H","I","J","K","L"]
+
+
 
 def returnListeIA():
     return listeIA
 
 class IA:
-    def __init__(self,modele):
+    def __init__(self,modele,name):
         global listeIA
         self.active = True
         if modele == "manuel":
             self.modele = Manuel([])
+        elif modele == "random":
+            self.modele = Random([])
         else:
-            self.modele = Manuel([])
+            self.modele = Random([])
         listeIA.append(self)
-        self.name = "IA" + str(len(listeIA))
+        self.name = name
     def __str__(self):
-        print("je suis l'ia associée au port" + self.port)
+        print("je suis l'ia associée au port" + str(self.port) + "  mon nom est : "+ self.name)
     def think(self,msg):
+        self.state = msg
         print("message pour "+self.name)
-        return self.modele.nextMove(msg)
+        return self.modele.nextMove(msg,self.name)
     def kill(self):
         self.active = False
         
@@ -41,7 +72,7 @@ class Manuel:
     def __init__(self,state):
         self.state = state
         self.history = []
-    def nextMove(self,status):
+    def nextMove(self,status,name):
         cardinaux = [False,False,False,False]
         print("status:\n")
         showState(status)
@@ -70,15 +101,32 @@ class Manuel:
                 "move": move,
                 "message": "Y o Y"
             }
-            return json.dumps(output).encode()
+            return output
         except:
             print('erreur au moment de créer la réponse, veuillez reessayer')
             self.nextMove(status)
 class Random:
     def __init__(self,state):
         self.state = state
-    def think(self):
-        return 0
+    def nextMove(self,state,name):
+        tile = random_turn_tile(state['tile'])
+        gateIndex = random.randint(0,11)
+        gate = gateList[gateIndex]
+        ValidDirections = validMoves(state,name)
+        temp = len(ValidDirections)-1
+        positionIndex = random.randint(0,temp)
+        newPosition = ValidDirections[positionIndex]
+        move ={
+            "tile": tile,
+            "gate": gate,
+            "new_position": newPosition
+        }
+        output = {
+            "response": "move",
+            "move": move,
+            "message": "I'm random and stupid"
+        }
+        return output
 
 
 
@@ -96,30 +144,7 @@ class Random:
 #   42 43 44 45 46 47 48
 #       I     H     G
 
-GATES = {
-    "A": {"start": 1, "end": 43, "inc": 7},
-    "B": {"start": 3, "end": 45, "inc": 7},
-    "C": {"start": 5, "end": 47, "inc": 7},
-    "D": {"start": 13, "end": 7, "inc": -1},
-    "E": {"start": 27, "end": 21, "inc": -1},
-    "F": {"start": 41, "end": 35, "inc": -1},
-    "G": {"start": 47, "end": 5, "inc": -7},
-    "H": {"start": 45, "end": 3, "inc": -7},
-    "I": {"start": 43, "end": 1, "inc": -7},
-    "J": {"start": 35, "end": 41, "inc": 1},
-    "K": {"start": 21, "end": 27, "inc": 1},
-    "L": {"start": 7, "end": 13, "inc": 1},
-}
-DIRECTIONS = {
-    "N": {"coords": (-1, 0), "inc": -7, "opposite": "S"},
-    "S": {"coords": (1, 0), "inc": 7, "opposite": "N"},
-    "W": {"coords": (0, -1), "inc": -1, "opposite": "E"},
-    "E": {"coords": (0, 1), "inc": 1, "opposite": "W"},
-    (-1, 0): {"name": "N"},
-    (1, 0): {"name": "S"},
-    (0, -1): {"name": "W"},
-    (0, 1): {"name": "E"},
-}
+
 class Emulateur:
     def __init__(self):
         self.state = 0
