@@ -8,7 +8,7 @@ from utils import isSameTile,turn_tile,random_turn_tile,showState
 #### ---A FAIRE--- ######
 #-Simulateur du jeu
 #-modele d'ia
-#):
+#testing
 
 
 listeIA = []
