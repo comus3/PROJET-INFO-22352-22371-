@@ -1,6 +1,6 @@
 import json
 import random
-from utils import isSameTile,turn_tile,random_turn_tile,showState
+from utils import isSameTile,turn_tile,random_turn_tile,showState,validMoves
 #### ---FAIT---    ######CREER CLASSE QUI VA CREER DES OBJETS IA, CHAQUE OBJET IA A UN ATRIBUT Active LES OBJETS SAPPELLLENT IA ET SONT RANGES DANS UNE LISTE
 #aussi un attribut socket qui est son socket
 #chaque objet ia possede uun attribut modèle qui pinte vers la fonction a utiliser pour calculer le next move
@@ -9,94 +9,6 @@ from utils import isSameTile,turn_tile,random_turn_tile,showState
 #-Simulateur du jeu
 #-modele d'ia
 #testing
-
-
-listeIA = []
-
-def returnListeIA():
-    return listeIA
-
-class IA:
-    def __init__(self,modele,name):
-        global listeIA
-        self.active = True
-        if modele == "manuel":
-            self.modele = Manuel([])
-        else:
-            self.modele = Manuel([])
-        listeIA.append(self)
-        self.name = name
-    def __str__(self):
-        print("je suis l'ia associée au port" + self.port)
-    def think(self,msg):
-        print("message pour "+self.name)
-        return self.modele.nextMove(msg)
-    def kill(self):
-        self.active = False
-        
-        
-
-####################### MODèLES IA  ################################
-
-class Manuel:
-    def __init__(self,state):
-        self.state = state
-        self.history = []
-    def nextMove(self,status):
-        cardinaux = [False,False,False,False]
-        print("status:\n")
-        #showState(status)
-        print(str(status))
-        user_input_orientation = str(input("orientation? (N/E/S/W... 1 et 0)   >>"))
-        user_input_gate = input("which gate..?  \n>>")
-        user_input_newpos = input("and new pos? \n>>")
-        try:
-            j = 0
-            for i in user_input_orientation:
-                cardinaux[j] = bool(i)
-                j= j+1
-            tile ={
-                "N": cardinaux[0],
-                "E": cardinaux[1],
-                "S": cardinaux[2],
-                "W": cardinaux[3],
-                "item": 1
-            }
-            move ={
-                "tile": tile,
-                "gate": user_input_gate,
-                "new_position": user_input_newpos
-            }
-            output = {
-                "response": "move",
-                "move": move,
-                "message": "Y o Y"
-            }
-            return json.dumps(output).encode()
-        except:
-            print('erreur au moment de créer la réponse, veuillez reessayer')
-            self.nextMove(status)
-class Random:
-    def __init__(self,state):
-        self.state = state
-    def think(self):
-        return 0
-
-
-
-
-
-####################### EMULATEURS JEU  ################################
-
-#       A     B     C
-#    0  1  2  3  4  5  6
-# L  7  8  9 10 11 12 13 D
-#   14 15 16 17 18 19 20
-# K 21 22 23 24 25 26 27 E
-#   28 29 30 31 32 33 34
-# J 35 36 37 38 39 40 41 F
-#   42 43 44 45 46 47 48
-#       I     H     G
 
 GATES = {
     "A": {"start": 1, "end": 43, "inc": 7},
@@ -122,6 +34,117 @@ DIRECTIONS = {
     (0, -1): {"name": "W"},
     (0, 1): {"name": "E"},
 }
+
+listeIA = []
+gateList = ["A","B","C","D","E","F","G","H","I","J","K","L"]
+
+
+
+def returnListeIA():
+    return listeIA
+
+class IA:
+    def __init__(self,modele,name):
+        global listeIA
+        self.active = True
+        if modele == "manuel":
+            self.modele = Manuel([])
+        elif modele == "random":
+            self.modele = Random([])
+        else:
+            self.modele = Random([])
+        listeIA.append(self)
+        self.name = name
+    def __str__(self):
+        print("je suis l'ia associée au port" + str(self.port) + "  mon nom est : "+ self.name)
+    def think(self,msg):
+        self.state = msg
+        print("message pour "+self.name)
+        return self.modele.nextMove(msg,self.name)
+    def kill(self):
+        self.active = False
+        
+        
+
+####################### MODèLES IA  ################################
+
+class Manuel:
+    def __init__(self,state):
+        self.state = state
+        self.history = []
+    def nextMove(self,status,name):
+        cardinaux = [False,False,False,False]
+        print("status:\n")
+        showState(status)
+        user_input_orientation = str(input("orientation? (N/E/S/W... 1 et 0)   >>"))
+        user_input_gate = input("which gate..?  \n>>")
+        user_input_newpos = input("and new pos? \n>>")
+        try:
+            j = 0
+            for i in user_input_orientation:
+                cardinaux[j] = bool(i)
+                j= j+1
+            tile ={
+                "N": cardinaux[0],
+                "E": cardinaux[1],
+                "S": cardinaux[2],
+                "W": cardinaux[3],
+                "item": 1
+            }
+            move ={
+                "tile": tile,
+                "gate": user_input_gate,
+                "new_position": user_input_newpos
+            }
+            output = {
+                "response": "move",
+                "move": move,
+                "message": "Y o Y"
+            }
+            return output
+        except:
+            print('erreur au moment de créer la réponse, veuillez reessayer')
+            self.nextMove(status)
+class Random:
+    def __init__(self,state):
+        self.state = state
+    def nextMove(self,state,name):
+        tile = random_turn_tile(state['tile'])
+        gateIndex = random.randint(0,11)
+        gate = gateList[gateIndex]
+        ValidDirections = validMoves(state,name)
+        temp = len(ValidDirections)-1
+        positionIndex = random.randint(0,temp)
+        newPosition = ValidDirections[positionIndex]
+        move ={
+            "tile": tile,
+            "gate": gate,
+            "new_position": newPosition
+        }
+        output = {
+            "response": "move",
+            "move": move,
+            "message": "I'm random and stupid"
+        }
+        return output
+
+
+
+
+
+####################### EMULATEURS JEU  ################################
+
+#       A     B     C
+#    0  1  2  3  4  5  6
+# L  7  8  9 10 11 12 13 D
+#   14 15 16 17 18 19 20
+# K 21 22 23 24 25 26 27 E
+#   28 29 30 31 32 33 34
+# J 35 36 37 38 39 40 41 F
+#   42 43 44 45 46 47 48
+#       I     H     G
+
+
 class Emulateur:
     def __init__(self):
         self.state = 0

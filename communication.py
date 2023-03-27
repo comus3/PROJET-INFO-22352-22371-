@@ -3,7 +3,7 @@ import socket
 import json
 from threading import Thread
 from main import IA#, returnListeIA
-from utils import requestSubscribeStringGenerator,jsonEncodeAndSend
+from utils import requestSubscribeStringGenerator,jsonEncode
 import sys
 #hey
 portMachine = 3000
@@ -44,7 +44,7 @@ def connecter():
     port = int(input("Entrez le port d'écoute de l'IA actuelle:   "))
     modele = str(input("quel modele d'ia souhaitez vous utilisez? (blank for default)      "))
     if modele == None:
-        modele = "manuel"
+        modele = "random"
     try:
         s.connect((adress,portMachine))
         (a,b) = requestSubscribeStringGenerator(port)
@@ -82,9 +82,9 @@ def life(ia,port):#################################################1) Ecouter 2)
                         read_Terminal = False
                         nextMove = ia.think(msg["state"])
                         read_Terminal = True
-                        client.send(nextMove)
+                        client.send(jsonEncode(nextMove))
                     elif msg["request"] == "ping":
-                        client.send(json.dumps(responseToPing).encode())
+                        client.send(jsonEncode(responseToPing))
                         print("requested ping... responding")
                     else:
                         print('message arrivé différent de play request ou ping!')

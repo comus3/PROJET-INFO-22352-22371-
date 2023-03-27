@@ -35,19 +35,37 @@ def requestSubscribeStringGenerator(port,):
 
 
 def jsonEncodeAndSend(message,s):
-    message = json.dumps(message)
-    message = message.encode()
-    send =False
+    message = jsonEncode(message)
+    send =True
     while send:
         try:
             s.send(message)
             send = False
         except Exception as e:
             print("envoi échoué: ", e)
+def jsonEncode(message):
+    return json.dumps(message).encode()
+    
 
-def validMoves(board,pos):
-    validDirections = {"North":False,"EAST":False,"SOUTH":False,"WEST":False}
-    #if (pos-7)>-1 and 
+
+def validMoves(status,ianame):
+    validPositions = []
+    player0or1 = 0
+    for i in range(2):
+        if status['players'][i] == ianame:
+            player0or1 = i
+    playerPos = status['positions'][player0or1]
+    if playerPos>6 and status['board'][playerPos]['N']:
+        validPositions.append(playerPos-7)
+    if playerPos<42 and status['board'][playerPos]['S']:
+        validPositions.append(playerPos+7)
+    if (playerPos%7)!=0 and status['board'][playerPos]['W']:
+        validPositions.append(playerPos-1)
+    if ((playerPos+1)%7)!=0 and status['board'][playerPos]['E']:
+        validPositions.append(playerPos+1)
+    validPositions.append(playerPos)
+    return validPositions
+        
 
 ##############################################          ALL CREDITS TO LURK1        ######################################################
 
@@ -122,5 +140,5 @@ EXEMPLE DE STATUS
 'W': True, 'item': 21}, {'N': True, 'E': True, 'S': False, 'W': True, 'item': 7}, {'N': False, 'E': False, 'S': True, 'W': True, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': True, 'item': 8}, {'N': False, 'E': True, 'S': True, 'W': False, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': True, 'item': 9}, {'N': True, 'E': True, 'S': False, 'W': False, 'item': None}, {'N': True, 'E': False, 'S': False, 'W': True, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': False, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': False, 'item': None}, {'N': True, 'E': False, 'S': False, 'W': True, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': False, 'item': None}, {'N': False, 'E': True, 'S': False, 'W': True, 'item': None}, {'N': True, 'E': True, 'S': False, 'W': False, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': 
 False, 'item': None}, {'N': True, 'E': True, 'S': False, 'W': True, 'item': 10}, {'N': True, 'E': False, 'S': False, 'W': True, 'item': 14}, {'N': True, 'E': True, 'S': False, 'W': True, 'item': 11}, {'N': True, 'E': False, 'S': True, 'W': False, 'item': None}, {'N': True, 'E': False, 
 'S': False, 'W': True, 'item': None}], 'tile': {'N': True, 'E': False, 'S': False, 'W': True, 'item': 12}, 'target': 10, 'remaining': [4, 4]}  
-orientation? (N/E/S/W... 1 et 0)
+
 """
