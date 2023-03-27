@@ -22,27 +22,35 @@ def terminal():
     global read_Terminal
     print('terminal ACTIVE')
     while read_Terminal:
-        command_list = ['/connect','/abandon','/exit']
+        command_list = ['/connect','/connect -m','/abandon','/exit']
         user_input = str(input(''))
         if user_input == command_list[0]:
             read_Terminal = False
-            if connecter() == 0:
+            port = int(input("Entrez le port d'écoute de l'IA actuelle:   "))
+            modele = str(input("quel modele d'ia souhaitez vous utilisez? (blank for default)"))
+            if connecter(port,modele) == 0:
                 read_Terminal = True
         elif user_input == command_list[1]:
+            numberofAIs = int(input('combien de ia?'))
+            modele = input('quel modele?')
+            for i in range(numberofAIs):
+                port = 5556+i
+                connecter(port,modele)
+        elif user_input == command_list[2]:
             continue
             #for John in returnListeIA():
             #    John.kill()
-        elif user_input == command_list[2]:
+        elif user_input == command_list[3]:
             sys.exit()
         else:
             print('commande non reconnue')
 
                 
-def connecter():
+            
+def connecter(port,modele):
     global read_Terminal
     s = socket.socket()
-    port = int(input("Entrez le port d'écoute de l'IA actuelle:   "))
-    modele = str(input("quel modele d'ia souhaitez vous utilisez? (blank for default)      "))
+    
     if modele == None:
         modele = "random"
     try:
