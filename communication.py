@@ -5,7 +5,7 @@ from threading import Thread
 from main import IA#, returnListeIA
 from utils import requestSubscribeStringGenerator,jsonEncodeAndSend
 import sys
-
+#hey
 portMachine = 3000
 read_Terminal = True
 socketList = []
