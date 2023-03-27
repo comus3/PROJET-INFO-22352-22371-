@@ -54,6 +54,8 @@ class IA:
             self.modele = Manuel([])
         elif modele == "random":
             self.modele = Random([])
+        elif modele == "rdfc":
+            self.modele = RDFC([])
         else:
             self.modele = Random([])
         listeIA.append(self)
