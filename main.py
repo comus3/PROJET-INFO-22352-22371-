@@ -1,4 +1,6 @@
 import json
+import random
+from utils import isSameTile,turn_tile,random_turn_tile,showBoard
 #### ---FAIT---    ######CREER CLASSE QUI VA CREER DES OBJETS IA, CHAQUE OBJET IA A UN ATRIBUT Active LES OBJETS SAPPELLLENT IA ET SONT RANGES DANS UNE LISTE
 #aussi un attribut socket qui est son socket
 #chaque objet ia possede uun attribut modèle qui pinte vers la fonction a utiliser pour calculer le next move
@@ -41,7 +43,9 @@ class Manuel:
         self.history = []
     def nextMove(self,status):
         cardinaux = [False,False,False,False]
-        user_input_orientation = str(input("message d'orignie:  \n\n\n\n"+str(status) + "\n\n\n\n\n orientation? (N/E/S/W... 1 et 0)   >>"))
+        print("status:\n")
+        showBoard(status["board"])
+        user_input_orientation = str(input("orientation? (N/E/S/W... 1 et 0)   >>"))
         user_input_gate = input("which gate..?  \n>>")
         user_input_newpos = input("and new pos? \n>>")
         try:
@@ -70,6 +74,13 @@ class Manuel:
         except:
             print('erreur au moment de créer la réponse, veuillez reessayer')
             self.nextMove(status)
+class Random:
+    def __init__(self,state):
+        self.state = state
+    def think(self):
+        return 0
+
+
 
 
 
@@ -85,7 +96,30 @@ class Manuel:
 #   42 43 44 45 46 47 48
 #       I     H     G
 
-
+GATES = {
+    "A": {"start": 1, "end": 43, "inc": 7},
+    "B": {"start": 3, "end": 45, "inc": 7},
+    "C": {"start": 5, "end": 47, "inc": 7},
+    "D": {"start": 13, "end": 7, "inc": -1},
+    "E": {"start": 27, "end": 21, "inc": -1},
+    "F": {"start": 41, "end": 35, "inc": -1},
+    "G": {"start": 47, "end": 5, "inc": -7},
+    "H": {"start": 45, "end": 3, "inc": -7},
+    "I": {"start": 43, "end": 1, "inc": -7},
+    "J": {"start": 35, "end": 41, "inc": 1},
+    "K": {"start": 21, "end": 27, "inc": 1},
+    "L": {"start": 7, "end": 13, "inc": 1},
+}
+DIRECTIONS = {
+    "N": {"coords": (-1, 0), "inc": -7, "opposite": "S"},
+    "S": {"coords": (1, 0), "inc": 7, "opposite": "N"},
+    "W": {"coords": (0, -1), "inc": -1, "opposite": "E"},
+    "E": {"coords": (0, 1), "inc": 1, "opposite": "W"},
+    (-1, 0): {"name": "N"},
+    (1, 0): {"name": "S"},
+    (0, -1): {"name": "W"},
+    (0, 1): {"name": "E"},
+}
 class Emulateur:
     def __init__(self):
         self.state = 0

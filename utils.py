@@ -1,5 +1,7 @@
 import socket
 import json
+import copy
+import random
 
 ####    ---FAIT---  ###### quelques fonctions de comm
 ####    ---A FAIRE--- #### 
@@ -42,6 +44,8 @@ def jsonEncodeAndSend(message,s):
         except Exception as e:
             print("envoi échoué: ", e)
 
+##############################################          ALL CREDITS TO LURK1        ######################################################
+
 def isSameTile(t1, t2):
     for _ in range(4):
         if t1 == t2:
@@ -50,9 +54,49 @@ def isSameTile(t1, t2):
 
     return False
 def turn_tile(tile):
-    #res = copy.deepcopy(tile)
+    res = copy.deepcopy(tile)
     res["N"] = tile["E"]
     res["E"] = tile["S"]
     res["S"] = tile["W"]
     res["W"] = tile["N"]
     return res
+
+def random_turn_tile(tile):
+    for _ in range(random.randint(1, 4)):
+        tile = turn_tile(tile)
+    return tile
+
+def showBoard(board):
+    mat = []
+    for i in range(28):
+        mat.append([])
+        for j in range(28):
+            mat[i].append(" ")
+    for index, value in enumerate(board):
+        i = (index // 7) * 4
+        j = (index % 7) * 4
+        mat[i][j] = "#"
+        mat[i][j + 1] = "#" if not value["N"] else " "
+        mat[i][j + 2] = "#"
+        mat[i][j + 3] = "|"
+        mat[i + 1][j] = "#" if not value["W"] else " "
+        mat[i + 1][j + 1] = (
+            " " if value["item"] is None else chr(ord("A") + value["item"])
+        )
+        mat[i + 1][j + 2] = "#" if not value["E"] else " "
+        mat[i + 1][j + 3] = "|"
+        mat[i + 2][j] = "#"
+        mat[i + 2][j + 1] = "#" if not value["S"] else " "
+        mat[i + 2][j + 2] = "#"
+        mat[i + 2][j + 3] = "|"
+        mat[i + 3][j] = "-"
+        mat[i + 3][j + 1] = "-"
+        mat[i + 3][j + 2] = "-"
+        mat[i + 3][j + 3] = "-"
+
+    print("\n".join(["".join(line) for line in mat]))
+
+
+
+
+#############################################################################################################################
