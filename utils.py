@@ -42,6 +42,3 @@ def jsonEncodeAndSend(message,s):
             print("envoi échoué: ", e)
 
 
-def respondToPing(socket):
-    jsonEncodeAndSend(responseToPing,socket)
-
