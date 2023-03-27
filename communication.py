@@ -30,6 +30,7 @@ def connecter():
         response = s.recv(2048)         
     except Exception as e:
         print("connection echouée: ", e)
+        s.close()
         return 0
     rep = json.loads(response.decode())
     if rep["response"] == "ok":
@@ -39,6 +40,7 @@ def connecter():
         s.close()
         print('réponse ok recue')
         return 0
+    s.close()
     print("error no ok response from server")
 
 def life(ia,adresse,port):#################################################1) Ecouter 2) JOUeR 3) parler 4) recommence:
