@@ -1,6 +1,7 @@
 
 
 # j'ai tout fait dans une seul fonction contrairement au prof
+#kbqscqs
 
 def findtreasure(plateau):
     def rdfs(i, j, chemin, visites):   #Méthode qui est utilisé Recursive Depth-first search    
