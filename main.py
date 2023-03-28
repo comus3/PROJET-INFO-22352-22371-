@@ -105,6 +105,8 @@ class Manuel:
         except:
             print('erreur au moment de créer la réponse, veuillez reessayer')
             self.nextMove(status)
+
+            
 class Random:
     def __init__(self,state):
         self.state = state
