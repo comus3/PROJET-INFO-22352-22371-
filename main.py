@@ -68,6 +68,19 @@ class IA:
     def __str__(self):
         print("je suis l'ia associée au port" + str(self.port) + "  mon nom est : "+ self.name)
     
+    def index2coords(index):
+        return index // 7, index % 7
+
+    def coords2index(i, j):
+        return i * 7 + j
+    
+    def isCoordsValid(i, j):
+        return i >= 0 and i < 7 and j >= 0 and i < 7
+    
+    def add(A, B):
+        return tuple(a + b for a, b in zip(A, B))
+
+
     def think(self, start, end, board):
         def successors(index):
             res = []
@@ -80,6 +93,7 @@ class IA:
                     if board[index][dirName] and board[coords2index(*coords)][opposite]:
                         res.append(coords2index(*coords))
             return res
+    
         
         goals = [end]
         visited = set()
@@ -177,6 +191,8 @@ class Random:
             "message": "I'm random and stupid"
         }
         return output
+    
+    
 class RDFC:
     def __init__(self,state):
         self.state = state
