@@ -43,6 +43,9 @@ gateList = ["A","B","C","D","E","F","G","H","I","J","K","L"]
 def returnListeIA():
     return listeIA
 
+
+##########################################################################################################  CLASSE  #####################################################################
+
 class IA:
     def __init__(self,modele,name):
         global listeIA
@@ -51,6 +54,8 @@ class IA:
             self.modele = Manuel([])
         elif modele == "random":
             self.modele = Random([])
+        elif modele == "rdfc":
+            self.modele = RDFC([])
         else:
             self.modele = Random([])
         listeIA.append(self)
@@ -129,6 +134,13 @@ class Random:
             "message": "I'm random and stupid"
         }
         return output
+class RDFC:
+    def __init__(self,state):
+        self.state = state
+    def nextMove(state):
+        
+        
+    
 
 
 
