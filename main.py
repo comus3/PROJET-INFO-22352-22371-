@@ -57,8 +57,8 @@ class IA:
             self.modele = Manuel([])
         elif modele == "random":
             self.modele = Random([])
-        #elif modele == "rdfc":
-        #    self.modele = RDFC([])
+        elif modele == "RDFC":
+            self.modele = RDFC([])
         else:
             self.modele = Random([])
         listeIA.append(self)
@@ -70,7 +70,7 @@ class IA:
         self.state = msg
         print("")
         print("message pour "+self.name)
-        return self.modele.nextMove(msg,self.name)
+        return self.modele.nextMove(self.state,self.name)
 
     def kill(self):
         self.active = False
@@ -146,7 +146,7 @@ class RDFC:
     def __init__(self,state):
         self.state = state
     def nextMove(self,state,name):   # (self,statue )
-        start, end, board = state['current'],treasurePos(state),state['board']
+        start, end, board = returnPos(state),treasurePos(state),state['board']
         def successors(index):
             res = []
             directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]

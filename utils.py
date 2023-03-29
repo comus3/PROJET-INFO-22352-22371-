@@ -53,7 +53,7 @@ def jsonEncode(message):
 
 def validMoves(status):#return une liste de nouvelles positions valides sur la cvarte
     validPositions = []
-    playerPos = status['current']
+    playerPos = returnPos(status)
     if playerPos>6 and status['board'][playerPos]['N']:
         validPositions.append(playerPos-7)
     if playerPos<42 and status['board'][playerPos]['S']:
@@ -69,6 +69,9 @@ def treasurePos(status):#return la position du trésor recherché
     for i in range(49):
         if status['board'][i]['item'] == status['target']:
             return i
+        
+def returnPos(status):
+    return status['positions'][status['current']]
 
 
 ############################UTILS POUR RDCF
