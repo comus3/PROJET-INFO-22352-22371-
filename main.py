@@ -57,22 +57,18 @@ class IA:
             self.modele = Manuel([])
         elif modele == "random":
             self.modele = Random([])
-        elif modele == "rdfc":
-            self.modele = RDFC([])
+        #elif modele == "rdfc":
+        #    self.modele = RDFC([])
         else:
             self.modele = Random([])
         listeIA.append(self)
         self.name = name
-    
-    
-    
-
 
     def think(self,msg):
         self.state = msg
         print("")
-    
-
+        print("message pour "+self.name)
+        return self.modele.nextMove(msg,self.name)
 
     def kill(self):
         self.active = False
@@ -143,7 +139,7 @@ class Random:
         }
         return output
     
-    
+"""
 class RDFC:
     def __init__(self,state):
         self.state = state
@@ -205,7 +201,7 @@ class RDFC:
         
     
 
-
+"""
 
 
 
