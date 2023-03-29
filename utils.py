@@ -19,10 +19,8 @@ responseToPing ={
     }
 
 ##############################################################################################################
-class Nodes:
-    def __init__(self,pos,connection):
-        self.pos = pos
-        self.connection = connection
+
+
 
 def requestSubscribeStringGenerator(port,):#Génère un string et le json.dimps et eoncdoe pr sub une ia
     global index
@@ -77,12 +75,46 @@ def treasurePos(status):#return la position du trésor recherché
 def returnPos(status):
     return status['positions'][status['current']]
 
-def shortestPath(status):
-    def recurcif():
-        return 0
+def transformPath(status):#Transforme notre labyrinthe en quelque chose de baucoup plus facile a manipuler
+    longTemp = 1
+    class Nodes:
+        global longTemp
+        def __init__(self,pos,board,connection = None):
+            self.pos = pos
+            self.connections = {}
+            if connection != None:
+                self.connections[connection[0]] = connection[1]
+            for i in passages(pos,board):
+                (a,b) = recurcif(self.pos,board,i)
+                connection[a] = b
+        def returnConnections(self):
+            return self.connections
+        def returnPosition(self):
+            return self.pos
+    def passages(pos,board):
+        passages = []
+        for i in cardinaux:
+            if board[pos][i]:
+                passages.append(i)
+    
+    def recurcif(pos,board,direction):
+        global longTemp
+        newpos = pos+cardinaux[direction]
+        if len(passages(newpos,board)) == 2 and board[newpos][direction]:
+            longTemp = longTemp + 1
+            recurcif(newpos,board,direction)
+        else:
+            newMap.append(Nodes(newpos,board))
+            return (newpos,longTemp)
+        
+    newMap = []
+    cardinaux = {'N':-7,'E':1,'S':7,'W':-1}
     start, end, board = returnPos(status),treasurePos(status),status['board']
 
-    cardinaux = ['N','E','S','W']
+    firstNode = Nodes(start,board)
+    newMap.append(firstNode)
+    recurcif(firstNode,board)
+    
 
 
 ############################UTILS POUR RDCF
