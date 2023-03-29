@@ -146,7 +146,7 @@ class RDFC:
     def __init__(self,state):
         self.state = state
     def nextMove(self,state,name):   # (self,statue )
-        start, end, board = state['current'],
+        start, end, board = state['current'],treasurePos(state),state['board']
         def successors(index):
             res = []
             directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
