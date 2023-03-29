@@ -11,6 +11,7 @@ from utils import isSameTile,turn_tile,random_turn_tile,showState,validMoves
 #-Simulateur du jeu
 #-modele d'ia
 #testing
+#ceci est ma brainche
 
 GATES = {
     "A": {"start": 1, "end": 43, "inc": 7},
@@ -56,22 +57,18 @@ class IA:
             self.modele = Manuel([])
         elif modele == "random":
             self.modele = Random([])
-        elif modele == "rdfc":
-            self.modele = RDFC([])
+        #elif modele == "rdfc":
+        #    self.modele = RDFC([])
         else:
             self.modele = Random([])
         listeIA.append(self)
         self.name = name
-    
-    
-    
-
 
     def think(self,msg):
         self.state = msg
         print("")
-    
-
+        print("message pour "+self.name)
+        return self.modele.nextMove(msg,self.name)
 
     def kill(self):
         self.active = False
@@ -142,7 +139,7 @@ class Random:
         }
         return output
     
-    
+"""
 class RDFC:
     def __init__(self,state):
         self.state = state
@@ -204,7 +201,7 @@ class RDFC:
         
     
 
-
+"""
 
 
 
@@ -219,7 +216,3 @@ class RDFC:
 # J 35 36 37 38 39 40 41 F
 #   42 43 44 45 46 47 48
 #       I     H     G
-
-class Emulateur:
-    def __init__(self):
-        self.state = 0
