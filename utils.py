@@ -8,7 +8,10 @@ import random
 # Fonction qui calcule le/les chemins vers trésor avec map comme arg
 # fonction random qui prend en param un nombre n(nombre de choix) et rend un chiffre compris entre 0 et n-1
 
-listnames = ["thomas","top",'nickel','super','ultra','bazarDuGrenier','leLApib','Bat','LEPHOENIX','equateur','tongo','tango','charlie','hebdo','lemecaudessusdemoiestnul','hexadecimal']
+listnames = []
+for i in range(500):
+    listnames.append('IA'+str(i))
+#listnames = ["thomas","top",'nickel','super','ultra','bazarDuGrenier','leLApib','Bat','LEPHOENIX','equateur','tongo','tango','charlie','hebdo','lemecaudessusdemoiestnul','hexadecimal']
 index = 0
 
 responseToPing ={
@@ -35,19 +38,61 @@ def requestSubscribeStringGenerator(port,):
 
 
 def jsonEncodeAndSend(message,s):
-    message = json.dumps(message)
-    message = message.encode()
-    send =False
+    message = jsonEncode(message)
+    send =True
     while send:
         try:
             s.send(message)
             send = False
         except Exception as e:
             print("envoi échoué: ", e)
+def jsonEncode(message):
+    return json.dumps(message).encode()
+    
 
-def validMoves(board,pos):
-    validDirections = {"North":False,"EAST":False,"SOUTH":False,"WEST":False}
-    #if (pos-7)>-1 and 
+
+def validMoves(status,ianame):
+    validPositions = []
+    player0or1 = 0
+    for i in range(2):
+        if status['players'][i] == ianame:
+            player0or1 = i
+    playerPos = status['positions'][player0or1]
+    if playerPos>6 and status['board'][playerPos]['N']:
+        validPositions.append(playerPos-7)
+    if playerPos<42 and status['board'][playerPos]['S']:
+        validPositions.append(playerPos+7)
+    if (playerPos%7)!=0 and status['board'][playerPos]['W']:
+        validPositions.append(playerPos-1)
+    if ((playerPos+1)%7)!=0 and status['board'][playerPos]['E']:
+        validPositions.append(playerPos+1)
+    validPositions.append(playerPos)
+    return validPositions
+
+
+def findtreasure(plateau):
+    def rdfs(i, j, chemin, visites):   #Méthode qui est utilisé Recursive Depth-first search    
+        chemin.append((i, j))
+        if plateau[i][j].statue == "trésor":
+            positions_tresors.append((i, j))
+        visites.add((i, j))
+        directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+        for di, dj in directions:
+            ni, nj = i + di, j + dj
+            if 0 <= ni < len(plateau) and 0 <= nj < len(plateau[0]) and plateau[ni][nj].statue != "board" and (ni, nj) not in visites:
+                rdfs(ni, nj, chemin, visites)
+        chemin.pop()
+        visites.remove((i, j))
+
+    positions_tresors = []  # liste des positions de trésor
+    visites = set()  # c'est l'ensemble des cases visitées pour que ça évite les boucles infinies
+    for i in range(len(plateau)):
+        for j in range(len(plateau[0])):
+            if plateau[i][j].statue == "start":
+                rdfs(i, j, [], visites)
+    return positions_tresors
+
+
 
 ##############################################          ALL CREDITS TO LURK1        ######################################################
 
@@ -122,5 +167,5 @@ EXEMPLE DE STATUS
 'W': True, 'item': 21}, {'N': True, 'E': True, 'S': False, 'W': True, 'item': 7}, {'N': False, 'E': False, 'S': True, 'W': True, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': True, 'item': 8}, {'N': False, 'E': True, 'S': True, 'W': False, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': True, 'item': 9}, {'N': True, 'E': True, 'S': False, 'W': False, 'item': None}, {'N': True, 'E': False, 'S': False, 'W': True, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': False, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': False, 'item': None}, {'N': True, 'E': False, 'S': False, 'W': True, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': False, 'item': None}, {'N': False, 'E': True, 'S': False, 'W': True, 'item': None}, {'N': True, 'E': True, 'S': False, 'W': False, 'item': None}, {'N': True, 'E': False, 'S': True, 'W': 
 False, 'item': None}, {'N': True, 'E': True, 'S': False, 'W': True, 'item': 10}, {'N': True, 'E': False, 'S': False, 'W': True, 'item': 14}, {'N': True, 'E': True, 'S': False, 'W': True, 'item': 11}, {'N': True, 'E': False, 'S': True, 'W': False, 'item': None}, {'N': True, 'E': False, 
 'S': False, 'W': True, 'item': None}], 'tile': {'N': True, 'E': False, 'S': False, 'W': True, 'item': 12}, 'target': 10, 'remaining': [4, 4]}  
-orientation? (N/E/S/W... 1 et 0)
+
 """
