@@ -23,7 +23,7 @@ def terminal():
     print('terminal ACTIVE')
     while read_Terminal:
         command_list = ['/connect','/connect -m','/abandon','/exit']
-        user_input = str(input(''))
+        user_input = str(input('combien?\n'))
         if user_input == command_list[0]:
             read_Terminal = False
             port = int(input("Entrez le port d'écoute de l'IA actuelle:   "))
