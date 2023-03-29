@@ -137,6 +137,7 @@ class RDFC:
     def __init__(self,state):
         self.state = state
     def nextMove(state):
+        return 0
         
         
     
@@ -157,7 +158,3 @@ class RDFC:
 #   42 43 44 45 46 47 48
 #       I     H     G
 
-
-class Emulateur:
-    def __init__(self):
-        self.state = 0
