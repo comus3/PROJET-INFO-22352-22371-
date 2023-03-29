@@ -64,62 +64,12 @@ class IA:
         self.name = name
     
     
-
-    def __str__(self):
-        print("je suis l'ia associée au port" + str(self.port) + "  mon nom est : "+ self.name)
     
-    def index2coords(index):
-        return index // 7, index % 7
-
-    def coords2index(i, j):
-        return i * 7 + j
-    
-    def isCoordsValid(i, j):
-        return i >= 0 and i < 7 and j >= 0 and i < 7
-    
-    def add(A, B):
-        return tuple(a + b for a, b in zip(A, B))
 
 
-    def think(self, start, end, board):
-        def successors(index):
-            res = []
-            directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
-            for dir in directions:
-                coords = add(index2coords(index), dir)
-                dirName = DIRECTIONS[dir]["name"]
-                opposite = DIRECTIONS[dirName]["opposite"]
-                if isCoordsValid(*coords):
-                    if board[index][dirName] and board[coords2index(*coords)][opposite]:
-                        res.append(coords2index(*coords))
-            return res
-    
-        
-        goals = [end]
-        visited = set()
-        parent = {}
-        parent[start] = None
-
-        def RDFC(node):
-            visited.add(node)
-            if node in goals:
-                return True
-            for successor in successors(node):
-                if successor not in visited:
-                    parent[successor] = node
-                    if RDFC(successor):
-                        return True
-            return False
-
-        RDFC(start)
-
-        res = []
-        node = goals[0]
-        while node is not None:
-            res.append(node)
-            node = parent[node]
-
-        return list(reversed(res))
+    def think(self,msg):
+        self.state = msg
+        print("")
     
 
 
@@ -196,7 +146,60 @@ class Random:
 class RDFC:
     def __init__(self,state):
         self.state = state
-    def nextMove(state):
+
+    def __str__(self):
+        print("je suis l'ia associée au port" + str(self.port) + "  mon nom est : "+ self.name)
+    
+    def index2coords(index):
+        return index // 7, index % 7
+
+    def coords2index(i, j):
+        return i * 7 + j
+    
+    def isCoordsValid(i, j):
+        return i >= 0 and i < 7 and j >= 0 and i < 7
+    
+    def add(A, B):
+        return tuple(a + b for a, b in zip(A, B))
+    def nextMove(self, start, end, board):   # (self,statue )
+        def successors(index):
+            res = []
+            directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+            for dir in directions:
+                coords = add(index2coords(index), dir)
+                dirName = DIRECTIONS[dir]["name"]
+                opposite = DIRECTIONS[dirName]["opposite"]
+                if isCoordsValid(*coords):
+                    if board[index][dirName] and board[coords2index(*coords)][opposite]:
+                        res.append(coords2index(*coords))
+            return res
+    
+        
+        goals = [end]
+        visited = set()
+        parent = {}
+        parent[start] = None
+
+        def RDFC(node):
+            visited.add(node)
+            if node in goals:
+                return True
+            for successor in successors(node):
+                if successor not in visited:
+                    parent[successor] = node
+                    if RDFC(successor):
+                        return True
+            return False
+
+        RDFC(start)
+
+        res = []
+        node = goals[0]
+        while node is not None:
+            res.append(node)
+            node = parent[node]
+
+        return list(reversed(res))
         
         
     
