@@ -20,7 +20,7 @@ responseToPing ={
 
 
 
-def requestSubscribeStringGenerator(port,):
+def requestSubscribeStringGenerator(port,):#Génère un string et le json.dimps et eoncdoe pr sub une ia
     global index
     matricule2 = str(22371 + index)
     name = listnames[index]
@@ -37,7 +37,7 @@ def requestSubscribeStringGenerator(port,):
     return (req,name)
 
 
-def jsonEncodeAndSend(message,s):
+def jsonEncodeAndSend(message,s):#encode json et envoie msg par un socket
     message = jsonEncode(message)
     send =True
     while send:
@@ -51,13 +51,9 @@ def jsonEncode(message):
     
 
 
-def validMoves(status,ianame):
+def validMoves(status,name):#return une liste de nouvelles positions valides sur la cvarte
     validPositions = []
-    player0or1 = 0
-    for i in range(2):
-        if status['players'][i] == ianame:
-            player0or1 = i
-    playerPos = status['positions'][player0or1]
+    playerPos = whatsMyPos(status,name)
     if playerPos>6 and status['board'][playerPos]['N']:
         validPositions.append(playerPos-7)
     if playerPos<42 and status['board'][playerPos]['S']:
@@ -68,6 +64,14 @@ def validMoves(status,ianame):
         validPositions.append(playerPos+1)
     validPositions.append(playerPos)
     return validPositions
+
+def whatsMyPos(status,name):#return sa pos 
+    j = 0
+    for i in status['players']:
+        if i.__eq__(name):
+            break
+        j = j+1
+    return status['positions'][j]
 
 
 def findtreasure(plateau):

@@ -63,6 +63,8 @@ class IA:
             self.modele = Random([])
         listeIA.append(self)
         self.name = name
+    def __str__(self):
+        print("je suis l'ia associée au port" + str(self.port) + "  mon nom est : "+ self.name)
 
     def think(self,msg):
         self.state = msg
@@ -139,13 +141,10 @@ class Random:
         }
         return output
     
-"""
+
 class RDFC:
     def __init__(self,state):
         self.state = state
-
-    def __str__(self):
-        print("je suis l'ia associée au port" + str(self.port) + "  mon nom est : "+ self.name)
     
     def index2coords(index):
         return index // 7, index % 7
@@ -201,7 +200,7 @@ class RDFC:
         
     
 
-"""
+
 
 
 
