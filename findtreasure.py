@@ -22,4 +22,6 @@ def findtreasure(plateau):
         for j in range(len(plateau[0])):
             if plateau[i][j].statue == "départ":
                 rdfs(i, j, [], visites)
+                
+    positions_tresors = [i * 7 + j for i, j in positions_tresors]
     return positions_tresors

@@ -1,6 +1,8 @@
 import json
 import random
 from utils import isSameTile,turn_tile,random_turn_tile,showState,validMoves
+
+
 #### ---FAIT---    ######CREER CLASSE QUI VA CREER DES OBJETS IA, CHAQUE OBJET IA A UN ATRIBUT Active LES OBJETS SAPPELLLENT IA ET SONT RANGES DANS UNE LISTE
 #aussi un attribut socket qui est son socket
 #chaque objet ia possede uun attribut modèle qui pinte vers la fonction a utiliser pour calculer le next move
@@ -60,12 +62,17 @@ class IA:
             self.modele = Random([])
         listeIA.append(self)
         self.name = name
-    def __str__(self):
-        print("je suis l'ia associée au port" + str(self.port) + "  mon nom est : "+ self.name)
+    
+    
+    
+
+
     def think(self,msg):
         self.state = msg
-        print("message pour "+self.name)
-        return self.modele.nextMove(msg,self.name)
+        print("")
+    
+
+
     def kill(self):
         self.active = False
         
@@ -110,6 +117,8 @@ class Manuel:
         except:
             print('erreur au moment de créer la réponse, veuillez reessayer')
             self.nextMove(status)
+
+            
 class Random:
     def __init__(self,state):
         self.state = state
@@ -132,10 +141,65 @@ class Random:
             "message": "I'm random and stupid"
         }
         return output
+    
+    
 class RDFC:
     def __init__(self,state):
         self.state = state
-    def nextMove(state):
+
+    def __str__(self):
+        print("je suis l'ia associée au port" + str(self.port) + "  mon nom est : "+ self.name)
+    
+    def index2coords(index):
+        return index // 7, index % 7
+
+    def coords2index(i, j):
+        return i * 7 + j
+    
+    def isCoordsValid(i, j):
+        return i >= 0 and i < 7 and j >= 0 and i < 7
+    
+    def add(A, B):
+        return tuple(a + b for a, b in zip(A, B))
+    def nextMove(self, start, end, board):   # (self,statue )
+        def successors(index):
+            res = []
+            directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+            for dir in directions:
+                coords = add(index2coords(index), dir)
+                dirName = DIRECTIONS[dir]["name"]
+                opposite = DIRECTIONS[dirName]["opposite"]
+                if isCoordsValid(*coords):
+                    if board[index][dirName] and board[coords2index(*coords)][opposite]:
+                        res.append(coords2index(*coords))
+            return res
+    
+        
+        goals = [end]
+        visited = set()
+        parent = {}
+        parent[start] = None
+
+        def RDFC(node):
+            visited.add(node)
+            if node in goals:
+                return True
+            for successor in successors(node):
+                if successor not in visited:
+                    parent[successor] = node
+                    if RDFC(successor):
+                        return True
+            return False
+
+        RDFC(start)
+
+        res = []
+        node = goals[0]
+        while node is not None:
+            res.append(node)
+            node = parent[node]
+
+        return list(reversed(res))
         
         
     
@@ -155,7 +219,6 @@ class RDFC:
 # J 35 36 37 38 39 40 41 F
 #   42 43 44 45 46 47 48
 #       I     H     G
-
 
 class Emulateur:
     def __init__(self):
