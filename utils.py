@@ -18,7 +18,11 @@ responseToPing ={
        "response": "pong"
     }
 
-
+##############################################################################################################
+class Nodes:
+    def __init__(self,pos,connection):
+        self.pos = pos
+        self.connection = connection
 
 def requestSubscribeStringGenerator(port,):#Génère un string et le json.dimps et eoncdoe pr sub une ia
     global index
@@ -72,6 +76,13 @@ def treasurePos(status):#return la position du trésor recherché
         
 def returnPos(status):
     return status['positions'][status['current']]
+
+def shortestPath(status):
+    def recurcif():
+        return 0
+    start, end, board = returnPos(status),treasurePos(status),status['board']
+
+    cardinaux = ['N','E','S','W']
 
 
 ############################UTILS POUR RDCF
@@ -172,6 +183,9 @@ def showState(state):
     for i, pos in enumerate(state["positions"]):
         print(" - {}: {}".format(state["players"][i], pos))
     showBoard(state["board"])
+
+
+
 
 
 

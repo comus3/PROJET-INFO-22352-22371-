@@ -8,10 +8,7 @@ from utils import *
 #chaque objet ia possede uun attribut modèle qui pinte vers la fonction a utiliser pour calculer le next move
 #ecdrire le premier modèle
 #### ---A FAIRE--- ######
-#-Simulateur du jeu
 #-modele d'ia
-#testing
-#ceci est ma brainche
 
 GATES = {
     "A": {"start": 1, "end": 43, "inc": 7},
@@ -185,6 +182,17 @@ class RDFC:
             node = parent[node]
 
         return list(reversed(res))
+    
+
+
+class COME:
+    #for i in moves possibles(ok si je fais un certain move dans les tuiles, quel est la longueur du meilleur pour moi?--> var1 et pour lui --> var2)
+    #pour quel move var1-var2 est minimum? --- faire ce move
+    def __init__(self,state):
+        self.state = state
+    def nextMove(self,state,name):
+        
+        
         
         
     
