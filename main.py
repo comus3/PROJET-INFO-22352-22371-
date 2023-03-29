@@ -1,6 +1,6 @@
 import json
 import random
-from utils import isSameTile,turn_tile,random_turn_tile,showState,validMoves
+from utils import *
 
 
 #### ---FAIT---    ######CREER CLASSE QUI VA CREER DES OBJETS IA, CHAQUE OBJET IA A UN ATRIBUT Active LES OBJETS SAPPELLLENT IA ET SONT RANGES DANS UNE LISTE
@@ -125,7 +125,7 @@ class Random:
         tile = random_turn_tile(state['tile'])
         gateIndex = random.randint(0,11)
         gate = gateList[gateIndex]
-        ValidDirections = validMoves(state,name)
+        ValidDirections = validMoves(state)
         temp = len(ValidDirections)-1
         positionIndex = random.randint(0,temp)
         newPosition = ValidDirections[positionIndex]
@@ -145,19 +145,8 @@ class Random:
 class RDFC:
     def __init__(self,state):
         self.state = state
-    
-    def index2coords(index):
-        return index // 7, index % 7
-
-    def coords2index(i, j):
-        return i * 7 + j
-    
-    def isCoordsValid(i, j):
-        return i >= 0 and i < 7 and j >= 0 and i < 7
-    
-    def add(A, B):
-        return tuple(a + b for a, b in zip(A, B))
-    def nextMove(self, start, end, board):   # (self,statue )
+    def nextMove(self,state,name):   # (self,statue )
+        start, end, board = state['current'],
         def successors(index):
             res = []
             directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]

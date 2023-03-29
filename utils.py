@@ -51,9 +51,9 @@ def jsonEncode(message):
     
 
 
-def validMoves(status,name):#return une liste de nouvelles positions valides sur la cvarte
+def validMoves(status):#return une liste de nouvelles positions valides sur la cvarte
     validPositions = []
-    playerPos = whatsMyPos(status,name)
+    playerPos = status['current']
     if playerPos>6 and status['board'][playerPos]['N']:
         validPositions.append(playerPos-7)
     if playerPos<42 and status['board'][playerPos]['S']:
@@ -65,14 +65,13 @@ def validMoves(status,name):#return une liste de nouvelles positions valides sur
     validPositions.append(playerPos)
     return validPositions
 
-def whatsMyPos(status,name):#return sa pos 
-    j = 0
-    for i in status['players']:
-        if i.__eq__(name):
-            break
-        j = j+1
-    return status['positions'][j]
+def treasurePos(status):#return la position du trésor recherché
+    for i in range(49):
+        if status['board'][i]['item'] == status['target']:
+            return i
 
+
+############################UTILS POUR RDCF
 
 def findtreasure(plateau):
     def rdfs(i, j, chemin, visites):   #Méthode qui est utilisé Recursive Depth-first search    
@@ -95,6 +94,18 @@ def findtreasure(plateau):
             if plateau[i][j].statue == "start":
                 rdfs(i, j, [], visites)
     return positions_tresors
+
+
+
+
+def index2coords(index):
+    return index // 7, index % 7
+def coords2index(i, j):
+    return i * 7 + j
+def isCoordsValid(i, j):
+    return i >= 0 and i < 7 and j >= 0 and i < 7
+def add(A, B):
+    return tuple(a + b for a, b in zip(A, B))
 
 
 
