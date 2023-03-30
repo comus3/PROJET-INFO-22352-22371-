@@ -57,13 +57,25 @@ def validMoves(status):#return une liste de nouvelles positions valides sur la c
     validPositions = []
     playerPos = returnPos(status)
     if playerPos>6 and status['board'][playerPos]['N']:
-        validPositions.append(playerPos-7)
+        newPos = playerPos-7
+        if (newPos)in range(49):
+            if status['board'][newPos]['S']:
+                validPositions.append(newPos)
     if playerPos<42 and status['board'][playerPos]['S']:
-        validPositions.append(playerPos+7)
+        newPos = playerPos +7
+        if (newPos)in range(49):
+            if status['board'][newPos]['N']:
+                validPositions.append(newPos)
     if (playerPos%7)!=0 and status['board'][playerPos]['W']:
-        validPositions.append(playerPos-1)
+        newPos = playerPos -1
+        if (newPos)in range(49):
+            if status['board'][newPos]['E']:
+                validPositions.append(newPos)
     if ((playerPos+1)%7)!=0 and status['board'][playerPos]['E']:
-        validPositions.append(playerPos+1)
+        newPos = playerPos +1
+        if (newPos)in range(49):
+            if status['board'][newPos]['W']:
+                validPositions.append(newPos)
     validPositions.append(playerPos)
     return validPositions
 
@@ -76,19 +88,16 @@ def returnPos(status):
     return status['positions'][status['current']]
 
 def transformPath(status):#Transforme notre labyrinthe en quelque chose de baucoup plus facile a manipuler
-    longTemp = 1
     class Nodes:
-        global longTemp
-        def __init__(self,pos,board,connection = None):
+        def __init__(self,pos,board):
             self.pos = pos
-            self.connections = {}
-            if connection != None:
-                self.connections[connection[0]] = connection[1]
+            self.connection = {}
             for i in passages(pos,board):
-                (a,b) = recurcif(self.pos,board,i)
-                connection[a] = b
+                longTemp = 1
+                (a,b) = recurcif(self.pos,board,i,longTemp)
+                self.connection[a] = b
         def returnConnections(self):
-            return self.connections
+            return self.connection
         def returnPosition(self):
             return self.pos
     def passages(pos,board):
@@ -96,25 +105,28 @@ def transformPath(status):#Transforme notre labyrinthe en quelque chose de bauco
         for i in cardinaux:
             if board[pos][i]:
                 passages.append(i)
-    
-    def recurcif(pos,board,direction):
-        global longTemp
+        return passages
+    def isInMap(pos):
+        for i in newMap:
+            if i.pos == pos:
+                return True
+        return False
+    def recurcif(pos,board,direction,longTemp):
         newpos = pos+cardinaux[direction]
         if len(passages(newpos,board)) == 2 and board[newpos][direction]:
             longTemp = longTemp + 1
-            recurcif(newpos,board,direction)
+            recurcif(newpos,board,direction,longTemp)
+        elif isInMap(newpos):
+            return(newpos,longTemp)
+        #elif 
         else:
             newMap.append(Nodes(newpos,board))
             return (newpos,longTemp)
-        
     newMap = []
     cardinaux = {'N':-7,'E':1,'S':7,'W':-1}
     start, end, board = returnPos(status),treasurePos(status),status['board']
-
-    firstNode = Nodes(start,board)
-    newMap.append(firstNode)
-    recurcif(firstNode,board)
-    
+    newMap.append(Nodes(start,board))
+    return newMap
 
 
 ############################UTILS POUR RDCF

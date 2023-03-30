@@ -83,6 +83,7 @@ class Manuel:
     def nextMove(self,status,name):
         cardinaux = [False,False,False,False]
         print("status:\n")
+        print("voici ce que contient le noveayx" + transformPath(status))
         showState(status)
         user_input_orientation = str(input("orientation? (N/E/S/W... 1 et 0)   >>"))
         user_input_gate = input("which gate..?  \n>>")
@@ -191,7 +192,8 @@ class COME:
     def __init__(self,state):
         self.state = state
     def nextMove(self,state,name):
-        
+        return 0
+
         
         
         
