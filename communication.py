@@ -14,10 +14,6 @@ responseToPing ={
     }
 
 
-
-
-
-
 def terminal():
     global read_Terminal
     print('terminal ACTIVE')
@@ -46,7 +42,7 @@ def terminal():
             print('commande non reconnue')
 
                 
-            
+         
 def connecter(port,modele):
     global read_Terminal
     s = socket.socket()
@@ -98,21 +94,11 @@ def life(ia,port):#################################################1) Ecouter 2)
                         print('message arrivé différent de play request ou ping!')
             except socket.timeout:
                 continue
+            #except Exception as e:
+                #print('erreur lors du recv: ', e)
 
-
-                
-    
-    
-    
-    
-
-
-    
-
-    
+ 
 #################################################################       ACTOIN      #############################################
-
-
 #adress = str(input("Entrez l'adresse i.p. du serveur:   "))
 adress = "localhost"
 terminal_Thread = Thread(target=terminal)

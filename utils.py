@@ -18,6 +18,31 @@ responseToPing ={
        "response": "pong"
     }
 
+
+GATES = {
+    "A": {"start": 1, "end": 43, "inc": 7},
+    "B": {"start": 3, "end": 45, "inc": 7},
+    "C": {"start": 5, "end": 47, "inc": 7},
+    "D": {"start": 13, "end": 7, "inc": -1},
+    "E": {"start": 27, "end": 21, "inc": -1},
+    "F": {"start": 41, "end": 35, "inc": -1},
+    "G": {"start": 47, "end": 5, "inc": -7},
+    "H": {"start": 45, "end": 3, "inc": -7},
+    "I": {"start": 43, "end": 1, "inc": -7},
+    "J": {"start": 35, "end": 41, "inc": 1},
+    "K": {"start": 21, "end": 27, "inc": 1},
+    "L": {"start": 7, "end": 13, "inc": 1},
+}
+DIRECTIONS = {
+    "N": {"coords": (-1, 0), "inc": -7, "opposite": "S"},
+    "S": {"coords": (1, 0), "inc": 7, "opposite": "N"},
+    "W": {"coords": (0, -1), "inc": -1, "opposite": "E"},
+    "E": {"coords": (0, 1), "inc": 1, "opposite": "W"},
+    (-1, 0): {"name": "N"},
+    (1, 0): {"name": "S"},
+    (0, -1): {"name": "W"},
+    (0, 1): {"name": "E"},
+}
 ##############################################################################################################
 
 
@@ -53,28 +78,27 @@ def jsonEncode(message):
     
 
 
-def validMoves(status):#return une liste de nouvelles positions valides sur la cvarte
+def validMoves(playerPos,board):#return une liste de nouvelles positions valides sur la carte ENTREE: Player position on board and the board
     validPositions = []
-    playerPos = returnPos(status)
-    if playerPos>6 and status['board'][playerPos]['N']:
+    if playerPos>6 and board[playerPos]['N']:
         newPos = playerPos-7
         if (newPos)in range(49):
-            if status['board'][newPos]['S']:
+            if board[newPos]['S']:
                 validPositions.append(newPos)
-    if playerPos<42 and status['board'][playerPos]['S']:
+    if playerPos<42 and board[playerPos]['S']:
         newPos = playerPos +7
         if (newPos)in range(49):
-            if status['board'][newPos]['N']:
+            if board[newPos]['N']:
                 validPositions.append(newPos)
-    if (playerPos%7)!=0 and status['board'][playerPos]['W']:
+    if (playerPos%7)!=0 and board[playerPos]['W']:
         newPos = playerPos -1
         if (newPos)in range(49):
-            if status['board'][newPos]['E']:
+            if board[newPos]['E']:
                 validPositions.append(newPos)
-    if ((playerPos+1)%7)!=0 and status['board'][playerPos]['E']:
+    if ((playerPos+1)%7)!=0 and board[playerPos]['E']:
         newPos = playerPos +1
         if (newPos)in range(49):
-            if status['board'][newPos]['W']:
+            if board[newPos]['W']:
                 validPositions.append(newPos)
     validPositions.append(playerPos)
     return validPositions
@@ -87,6 +111,8 @@ def treasurePos(status):#return la position du trésor recherché
 def returnPos(status):
     return status['positions'][status['current']]
 
+#ANCIENNE VERSION
+"""
 def transformPath(status):#Transforme notre labyrinthe en quelque chose de baucoup plus facile a manipuler
     class Nodes:
         def __init__(self,pos,board):
@@ -127,9 +153,10 @@ def transformPath(status):#Transforme notre labyrinthe en quelque chose de bauco
     start, end, board = returnPos(status),treasurePos(status),status['board']
     newMap.append(Nodes(start,board))
     return newMap
+"""
 
 
-############################UTILS POUR RDCF
+#########################################UTILS POUR RDCF
 
 def findtreasure(plateau):
     def rdfs(i, j, chemin, visites):   #Méthode qui est utilisé Recursive Depth-first search    
@@ -227,6 +254,26 @@ def showState(state):
     for i, pos in enumerate(state["positions"]):
         print(" - {}: {}".format(state["players"][i], pos))
     showBoard(state["board"])
+def slideTiles(board, free, gate):
+    start = GATES[gate]["start"]
+    end = GATES[gate]["end"]
+    inc = GATES[gate]["inc"]
+    new_free = board[end]
+    new_board = copy.deepcopy(board)
+    dest = end
+    src = end - inc
+    while dest != start:
+        new_board[dest] = new_board[src]
+        dest = src
+        src -= inc
+    new_board[start] = free
+    return new_board, new_free
+def onTrack(index, gate):
+    return index in range(
+        GATES[gate]["start"],
+        GATES[gate]["end"] + GATES[gate]["inc"],
+        GATES[gate]["inc"],
+    )
 
 
 

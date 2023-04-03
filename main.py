@@ -34,7 +34,7 @@ DIRECTIONS = {
     (0, -1): {"name": "W"},
     (0, 1): {"name": "E"},
 }
-
+nonBouges = [0,2,4,6,14,16,18,20,28,30,32,34,32,34,36,38]
 listeIA = []
 gateList = ["A","B","C","D","E","F","G","H","I","J","K","L"]
 
@@ -65,7 +65,6 @@ class IA:
 
     def think(self,msg):
         self.state = msg
-        print("")
         print("message pour "+self.name)
         return self.modele.nextMove(self.state,self.name)
 
@@ -81,24 +80,19 @@ class Manuel:
         self.state = state
         self.history = []
     def nextMove(self,status,name):
-        cardinaux = [False,False,False,False]
         print("status:\n")
-        print("voici ce que contient le noveayx" + transformPath(status))
+        #print("voici ce que contient le noveayx" + transformPath(status))
         showState(status)
         user_input_orientation = str(input("orientation? (N/E/S/W... 1 et 0)   >>"))
         user_input_gate = input("which gate..?  \n>>")
-        user_input_newpos = input("and new pos? \n>>")
+        user_input_newpos = int(input("and new pos? \n>>"))
         try:
-            j = 0
-            for i in user_input_orientation:
-                cardinaux[j] = bool(i)
-                j= j+1
-            tile ={
-                "N": cardinaux[0],
-                "E": cardinaux[1],
-                "S": cardinaux[2],
-                "W": cardinaux[3],
-                "item": 1
+            tile = {
+                "N": bool(int(user_input_orientation[0])),
+                "E": bool(int(user_input_orientation[1])),
+                "S": bool(int(user_input_orientation[2])),
+                "W": bool(int(user_input_orientation[3])),
+                "item": status['tile']['item']
             }
             move ={
                 "tile": tile,
@@ -108,12 +102,12 @@ class Manuel:
             output = {
                 "response": "move",
                 "move": move,
-                "message": "Y o Y"
+                "message": "EMANUEL la menace"
             }
             return output
-        except:
-            print('erreur au moment de créer la réponse, veuillez reessayer')
-            self.nextMove(status)
+        except Exception as e:
+            print('erreur au moment de créer la réponse, veuillez reessayer     ',e)
+            self.nextMove(self,status,name)
 
             
 class Random:
@@ -121,11 +115,25 @@ class Random:
         self.state = state
     def nextMove(self,state,name):
         tile = random_turn_tile(state['tile'])
-        gateIndex = random.randint(0,11)
-        gate = gateList[gateIndex]
-        ValidDirections = validMoves(state)
-        temp = len(ValidDirections)-1
-        positionIndex = random.randint(0,temp)
+        playerPos = returnPos(state)
+        while True:
+            gateIndex = random.randint(0,11)
+            gate = gateList[gateIndex]
+            if GATES[gate]['end'] not in state['positions']:
+                break
+        newBoard,newTile = slideTiles(state['board'],tile,gate)
+        new_positions = []
+        for position in state["positions"]:
+            if onTrack(position, gate):
+                if position == GATES[gate]["end"]:
+                    new_positions.append(GATES[gate]["start"])
+                    continue
+                new_positions.append(position + GATES[gate]["inc"])
+                continue
+            new_positions.append(position)
+        state["positions"] = new_positions
+        ValidDirections = validMoves(returnPos(state),newBoard)
+        positionIndex = random.randint(0,len(ValidDirections)-1)
         newPosition = ValidDirections[positionIndex]
         move ={
             "tile": tile,
@@ -186,7 +194,7 @@ class RDFC:
     
 
 
-class COME:
+class Negamax:
     #for i in moves possibles(ok si je fais un certain move dans les tuiles, quel est la longueur du meilleur pour moi?--> var1 et pour lui --> var2)
     #pour quel move var1-var2 est minimum? --- faire ce move
     def __init__(self,state):
