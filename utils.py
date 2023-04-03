@@ -111,6 +111,15 @@ def treasurePos(status):#return la position du trésor recherché
 def returnPos(status):
     return status['positions'][status['current']]
 
+def availableMoves(state):#return les moves possibles pour apres aller itérer dedans
+    return 0
+def evalState(state):#return le poids de la situation
+    return 0
+def negamax(board,depth,player):
+    return 0
+def update(state,move):
+    return 0
+
 #ANCIENNE VERSION
 """
 def transformPath(status):#Transforme notre labyrinthe en quelque chose de baucoup plus facile a manipuler
@@ -274,6 +283,9 @@ def onTrack(index, gate):
         GATES[gate]["end"] + GATES[gate]["inc"],
         GATES[gate]["inc"],
     )
+
+
+
 
 
 

@@ -115,7 +115,6 @@ class Random:
         self.state = state
     def nextMove(self,state,name):
         tile = random_turn_tile(state['tile'])
-        playerPos = returnPos(state)
         while True:
             gateIndex = random.randint(0,11)
             gate = gateList[gateIndex]
@@ -199,8 +198,31 @@ class Negamax:
     #pour quel move var1-var2 est minimum? --- faire ce move
     def __init__(self,state):
         self.state = state
+        self.depth = 1
     def nextMove(self,state,name):
-        return 0
+        bestMove = None
+        bestValue = float('-inf')
+        for move in availableMoves(state):
+            newState = update(state,move)
+            value = -negamax(newState, self.depth - 1,)
+            if value > bestValue:
+                bestValue = value
+                bestMove = move
+        if bestMove == None:
+            newModel = Random(state)
+            output = newModel.nextMove(state)
+        move ={
+            "tile": move['tile'],
+            "gate": move['gate'],
+            "new_position": move['newPos']
+        }
+        output = {
+            "response": "move",
+            "move": move,
+            "message": "I'm random and stupid"
+        }
+        return output
+        
 
         
         
