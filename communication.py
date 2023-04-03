@@ -14,16 +14,12 @@ responseToPing ={
     }
 
 
-
-
-
-
 def terminal():
     global read_Terminal
     print('terminal ACTIVE')
     while read_Terminal:
         command_list = ['/connect','/connect -m','/abandon','/exit']
-        user_input = str(input('combien?\n'))
+        user_input = str(input('\n>>'))
         if user_input == command_list[0]:
             read_Terminal = False
             port = int(input("Entrez le port d'écoute de l'IA actuelle:   "))
@@ -34,7 +30,7 @@ def terminal():
             numberofAIs = int(input('combien de ia?'))
             modele = input('quel modele?')
             for i in range(numberofAIs):
-                port = 5556+i
+                port = 5596+i
                 connecter(port,modele)
         elif user_input == command_list[2]:
             continue
@@ -46,7 +42,7 @@ def terminal():
             print('commande non reconnue')
 
                 
-            
+         
 def connecter(port,modele):
     global read_Terminal
     s = socket.socket()
@@ -98,21 +94,11 @@ def life(ia,port):#################################################1) Ecouter 2)
                         print('message arrivé différent de play request ou ping!')
             except socket.timeout:
                 continue
+            #except Exception as e:
+                #print('erreur lors du recv: ', e)
 
-
-                
-    
-    
-    
-    
-
-
-    
-
-    
+ 
 #################################################################       ACTOIN      #############################################
-
-
 #adress = str(input("Entrez l'adresse i.p. du serveur:   "))
 adress = "localhost"
 terminal_Thread = Thread(target=terminal)

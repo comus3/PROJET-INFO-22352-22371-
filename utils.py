@@ -19,8 +19,35 @@ responseToPing ={
     }
 
 
+GATES = {
+    "A": {"start": 1, "end": 43, "inc": 7},
+    "B": {"start": 3, "end": 45, "inc": 7},
+    "C": {"start": 5, "end": 47, "inc": 7},
+    "D": {"start": 13, "end": 7, "inc": -1},
+    "E": {"start": 27, "end": 21, "inc": -1},
+    "F": {"start": 41, "end": 35, "inc": -1},
+    "G": {"start": 47, "end": 5, "inc": -7},
+    "H": {"start": 45, "end": 3, "inc": -7},
+    "I": {"start": 43, "end": 1, "inc": -7},
+    "J": {"start": 35, "end": 41, "inc": 1},
+    "K": {"start": 21, "end": 27, "inc": 1},
+    "L": {"start": 7, "end": 13, "inc": 1},
+}
+DIRECTIONS = {
+    "N": {"coords": (-1, 0), "inc": -7, "opposite": "S"},
+    "S": {"coords": (1, 0), "inc": 7, "opposite": "N"},
+    "W": {"coords": (0, -1), "inc": -1, "opposite": "E"},
+    "E": {"coords": (0, 1), "inc": 1, "opposite": "W"},
+    (-1, 0): {"name": "N"},
+    (1, 0): {"name": "S"},
+    (0, -1): {"name": "W"},
+    (0, 1): {"name": "E"},
+}
+##############################################################################################################
 
-def requestSubscribeStringGenerator(port,):
+
+
+def requestSubscribeStringGenerator(port,):#Génère un string et le json.dimps et eoncdoe pr sub une ia
     global index
     matricule2 = str(22371 + index)
     name = listnames[index]
@@ -37,7 +64,7 @@ def requestSubscribeStringGenerator(port,):
     return (req,name)
 
 
-def jsonEncodeAndSend(message,s):
+def jsonEncodeAndSend(message,s):#encode json et envoie msg par un socket
     message = jsonEncode(message)
     send =True
     while send:
@@ -51,24 +78,94 @@ def jsonEncode(message):
     
 
 
-def validMoves(status,ianame):
+def validMoves(playerPos,board):#return une liste de nouvelles positions valides sur la carte ENTREE: Player position on board and the board
     validPositions = []
-    player0or1 = 0
-    for i in range(2):
-        if status['players'][i] == ianame:
-            player0or1 = i
-    playerPos = status['positions'][player0or1]
-    if playerPos>6 and status['board'][playerPos]['N']:
-        validPositions.append(playerPos-7)
-    if playerPos<42 and status['board'][playerPos]['S']:
-        validPositions.append(playerPos+7)
-    if (playerPos%7)!=0 and status['board'][playerPos]['W']:
-        validPositions.append(playerPos-1)
-    if ((playerPos+1)%7)!=0 and status['board'][playerPos]['E']:
-        validPositions.append(playerPos+1)
+    if playerPos>6 and board[playerPos]['N']:
+        newPos = playerPos-7
+        if (newPos)in range(49):
+            if board[newPos]['S']:
+                validPositions.append(newPos)
+    if playerPos<42 and board[playerPos]['S']:
+        newPos = playerPos +7
+        if (newPos)in range(49):
+            if board[newPos]['N']:
+                validPositions.append(newPos)
+    if (playerPos%7)!=0 and board[playerPos]['W']:
+        newPos = playerPos -1
+        if (newPos)in range(49):
+            if board[newPos]['E']:
+                validPositions.append(newPos)
+    if ((playerPos+1)%7)!=0 and board[playerPos]['E']:
+        newPos = playerPos +1
+        if (newPos)in range(49):
+            if board[newPos]['W']:
+                validPositions.append(newPos)
     validPositions.append(playerPos)
     return validPositions
 
+def treasurePos(status):#return la position du trésor recherché
+    for i in range(49):
+        if status['board'][i]['item'] == status['target']:
+            return i
+        
+def returnPos(status):
+    return status['positions'][status['current']]
+
+def availableMoves(state):#return les moves possibles pour apres aller itérer dedans
+    return 0
+def evalState(state):#return le poids de la situation
+    return 0
+def negamax(board,depth,player):
+    return 0
+def update(state,move):
+    return 0
+
+#ANCIENNE VERSION
+"""
+def transformPath(status):#Transforme notre labyrinthe en quelque chose de baucoup plus facile a manipuler
+    class Nodes:
+        def __init__(self,pos,board):
+            self.pos = pos
+            self.connection = {}
+            for i in passages(pos,board):
+                longTemp = 1
+                (a,b) = recurcif(self.pos,board,i,longTemp)
+                self.connection[a] = b
+        def returnConnections(self):
+            return self.connection
+        def returnPosition(self):
+            return self.pos
+    def passages(pos,board):
+        passages = []
+        for i in cardinaux:
+            if board[pos][i]:
+                passages.append(i)
+        return passages
+    def isInMap(pos):
+        for i in newMap:
+            if i.pos == pos:
+                return True
+        return False
+    def recurcif(pos,board,direction,longTemp):
+        newpos = pos+cardinaux[direction]
+        if len(passages(newpos,board)) == 2 and board[newpos][direction]:
+            longTemp = longTemp + 1
+            recurcif(newpos,board,direction,longTemp)
+        elif isInMap(newpos):
+            return(newpos,longTemp)
+        #elif 
+        else:
+            newMap.append(Nodes(newpos,board))
+            return (newpos,longTemp)
+    newMap = []
+    cardinaux = {'N':-7,'E':1,'S':7,'W':-1}
+    start, end, board = returnPos(status),treasurePos(status),status['board']
+    newMap.append(Nodes(start,board))
+    return newMap
+"""
+
+
+#########################################UTILS POUR RDCF
 
 def findtreasure(plateau):
     def rdfs(i, j, chemin, visites):   #Méthode qui est utilisé Recursive Depth-first search    
@@ -91,6 +188,18 @@ def findtreasure(plateau):
             if plateau[i][j].statue == "start":
                 rdfs(i, j, [], visites)
     return positions_tresors
+
+
+
+
+def index2coords(index):
+    return index // 7, index % 7
+def coords2index(i, j):
+    return i * 7 + j
+def isCoordsValid(i, j):
+    return i >= 0 and i < 7 and j >= 0 and i < 7
+def add(A, B):
+    return tuple(a + b for a, b in zip(A, B))
 
 
 
@@ -154,6 +263,32 @@ def showState(state):
     for i, pos in enumerate(state["positions"]):
         print(" - {}: {}".format(state["players"][i], pos))
     showBoard(state["board"])
+def slideTiles(board, free, gate):
+    start = GATES[gate]["start"]
+    end = GATES[gate]["end"]
+    inc = GATES[gate]["inc"]
+    new_free = board[end]
+    new_board = copy.deepcopy(board)
+    dest = end
+    src = end - inc
+    while dest != start:
+        new_board[dest] = new_board[src]
+        dest = src
+        src -= inc
+    new_board[start] = free
+    return new_board, new_free
+def onTrack(index, gate):
+    return index in range(
+        GATES[gate]["start"],
+        GATES[gate]["end"] + GATES[gate]["inc"],
+        GATES[gate]["inc"],
+    )
+
+
+
+
+
+
 
 
 
