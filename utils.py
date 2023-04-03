@@ -2,7 +2,7 @@ import socket
 import json
 import copy
 import random
-import numpy
+from Dijkstra import *
 
 ####    ---FAIT---  ###### quelques fonctions de comm
 ####    ---A FAIRE--- #### 
@@ -14,6 +14,8 @@ for i in range(500):
     listnames.append('IA'+str(i))
 #listnames = ["thomas","top",'nickel','super','ultra','bazarDuGrenier','leLApib','Bat','LEPHOENIX','equateur','tongo','tango','charlie','hebdo','lemecaudessusdemoiestnul','hexadecimal']
 index = 0
+
+
 
 responseToPing ={
        "response": "pong"
@@ -35,10 +37,10 @@ GATES = {
     "L": {"start": 7, "end": 13, "inc": 1},
 }
 DIRECTIONS = {
-    "N": {"coords": (-1, 0), "inc": -7, "opposite": "S"},
-    "S": {"coords": (1, 0), "inc": 7, "opposite": "N"},
-    "W": {"coords": (0, -1), "inc": -1, "opposite": "E"},
-    "E": {"coords": (0, 1), "inc": 1, "opposite": "W"},
+    "N": {"coords": (-1, 0), "inc": -7, "opposite": "S","sides":("E","W")},
+    "S": {"coords": (1, 0), "inc": 7, "opposite": "N","sides":("E","W")},
+    "W": {"coords": (0, -1), "inc": -1, "opposite": "E","sides":("N","S")},
+    "E": {"coords": (0, 1), "inc": 1, "opposite": "W","sides":("N","S")},
     (-1, 0): {"name": "N"},
     (1, 0): {"name": "S"},
     (0, -1): {"name": "W"},
@@ -65,8 +67,6 @@ def requestSubscribeStringGenerator(port,):#Génère un string et le json.dimps 
     req = req.encode()
 
     return (req,name)
-
-
 def jsonEncodeAndSend(message,s):#encode json et envoie msg par un socket
     message = jsonEncode(message)
     send =True
@@ -105,15 +105,12 @@ def validNewPos(playerPos,board):#return une liste de nouvelles positions valide
                 validPositions.append(newPos)
     validPositions.append(playerPos)
     return validPositions
-
 def treasurePos(status):#return la position du trésor recherché
     for i in range(49):
         if status['board'][i]['item'] == status['target']:
-            return i
-        
+            return i     
 def returnPos(status):
     return status['positions'][status['current']]
-
 def availableMoves(state):#return les moves possibles pour apres aller itérer dedans
     moves = []
     temp = []
@@ -160,7 +157,13 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
                         moves.append(move)    
     return moves
 def evalState(state):#return le poids de la situation
-    return 0
+    debut = returnPos(state)
+    g = transformPath(state['board'],debut)
+    start = g.get_vertex(debut)
+    dijkstra(g, start)
+    end = g.get_vertex(treasurePos(state))
+    path = [end.get_id()]
+    return len(shortest(end, path))
 def update(state,move):
     state['board'],state['tile'] = slideTiles(state['board'],move['tile'],move['gate'])
     new_positions = []
@@ -174,10 +177,54 @@ def update(state,move):
         new_positions.append(position)
     state["positions"] = new_positions
     return state
+def transformPath(board,pos):
+    def recursiveLinks(pos,board,longueur,dir):
+        stacked = stackedTile(pos,board)
+        if not stacked[dir]:
+            nodes(pos,board,DIRECTIONS[dir]['opposite'])
+            return (pos,longueur)
+        else:
+            if not(stacked[DIRECTIONS[dir]['sides'][0]] and stacked[DIRECTIONS[dir]['sides'][1]]):
+                newPos = pos +DIRECTIONS[dir]['inc']
+                if newPos in validNewPos(pos,board):
+                    recursiveLinks(newPos,board,longueur+1,dir)
+            else:
+                nodes(pos,board,DIRECTIONS[dir]['opposite'])
+                return (pos,longueur)
+    def nodes(pos,board,exception=None):
+        g.add_vertex(str(pos))
+        stacked = stackedTile(pos,board)
+        for card in DIRECTIONS:
+            if card == exception:
+                continue
+            if stacked[card]:
+                newPos = pos +DIRECTIONS[card]['inc']
+                if newPos in validNewPos(pos,board):
+                    a,b = recursiveLinks(newPos,board,1,card)
+                    g.add_edge(pos,a,b)
+    g = Graph()
+    nodes(pos)
+    return g
+def negamax(state, depth, player):
+    if depth == 0:
+        return player * evalState(state)
+    best_value = float('-inf')
+    for move in availableMoves(state):
+        newState = update(state,move)
+        value = -negamax(newState, depth - 1, -player)
+        best_value = max(best_value, value)
+    return best_value
+def stackedTile(pos,board):
+    newTile = {}
+    for cardinal in DIRECTIONS:
+        tilePos = pos+DIRECTIONS[cardinal]['inc']
+        liste = [board[pos][cardinal]]
+        if tilePos in range(49):
+            liste.append(board[tilePos][cardinal])
+        newTile[cardinal] = all(liste)
+    return newTile
 
-def negamax(board,depth,player):
-    return 0
-#ANCIENNE VERSION
+#ANCIENNE VERSION(plus utilisée car classe dans Dijkstra meilleure et plus opti)
 """
 def transformPath(status):#Transforme notre labyrinthe en quelque chose de baucoup plus facile a manipuler
     class Nodes:

@@ -71,7 +71,6 @@ class IA:
     def kill(self):
         self.active = False
         
-        
 
 ####################### MODèLES IA  ################################
 
@@ -192,18 +191,18 @@ class RDFC:
         return list(reversed(res))
     
 
-
 class Negamax:
     #for i in moves possibles(ok si je fais un certain move dans les tuiles, quel est la longueur du meilleur pour moi?--> var1 et pour lui --> var2)
     #pour quel move var1-var2 est minimum? --- faire ce move
     def __init__(self,state):
         self.state = state
-        self.depth = 1
+        self.depth = 1      # /!\ MODIFIER LE POID ICI /!\
         self.player = 1
+        self.mode = 'intesive'
     def nextMove(self,state,name):
         bestMove = None
         bestValue = float('-inf')
-        for move in availableMoves(state):
+        for move in validNewPos(state):
             newState = update(state,move)
             value = -negamax(newState, self.depth - 1,-self.player)
             if value > bestValue:
