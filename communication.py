@@ -34,7 +34,7 @@ def terminal():
             numberofAIs = int(input('combien de ia?'))
             modele = input('quel modele?')
             for i in range(numberofAIs):
-                port = 5556+i
+                port = 5596+i
                 connecter(port,modele)
         elif user_input == command_list[2]:
             continue
