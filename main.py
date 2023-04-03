@@ -131,7 +131,7 @@ class Random:
                 continue
             new_positions.append(position)
         state["positions"] = new_positions
-        ValidDirections = validMoves(returnPos(state),newBoard)
+        ValidDirections = validNewPos(returnPos(state),newBoard)
         positionIndex = random.randint(0,len(ValidDirections)-1)
         newPosition = ValidDirections[positionIndex]
         move ={
@@ -199,12 +199,13 @@ class Negamax:
     def __init__(self,state):
         self.state = state
         self.depth = 1
+        self.player = 1
     def nextMove(self,state,name):
         bestMove = None
         bestValue = float('-inf')
         for move in availableMoves(state):
             newState = update(state,move)
-            value = -negamax(newState, self.depth - 1,)
+            value = -negamax(newState, self.depth - 1,-self.player)
             if value > bestValue:
                 bestValue = value
                 bestMove = move

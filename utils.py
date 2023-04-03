@@ -2,6 +2,7 @@ import socket
 import json
 import copy
 import random
+import numpy
 
 ####    ---FAIT---  ###### quelques fonctions de comm
 ####    ---A FAIRE--- #### 
@@ -43,6 +44,8 @@ DIRECTIONS = {
     (0, -1): {"name": "W"},
     (0, 1): {"name": "E"},
 }
+
+tuileCouloir = {'N':True,'E':False,'S':True,'W':False}
 ##############################################################################################################
 
 
@@ -78,7 +81,7 @@ def jsonEncode(message):
     
 
 
-def validMoves(playerPos,board):#return une liste de nouvelles positions valides sur la carte ENTREE: Player position on board and the board
+def validNewPos(playerPos,board):#return une liste de nouvelles positions valides sur la carte ENTREE: Player position on board and the board
     validPositions = []
     if playerPos>6 and board[playerPos]['N']:
         newPos = playerPos-7
@@ -112,14 +115,68 @@ def returnPos(status):
     return status['positions'][status['current']]
 
 def availableMoves(state):#return les moves possibles pour apres aller itérer dedans
-    return 0
+    moves = []
+    temp = []
+    for key in DIRECTIONS:temp.append(state['tile'][key])
+    if all(temp) or not any(temp):
+        for gate in GATES:
+            if GATES[gate]['end'] not in state['positions']:
+                move ={
+                "tile": state['tile'],
+                "gate": gate
+                }
+                tempState = update(state,move)
+                newPos = validNewPos(returnPos(tempState),tempState['board'])
+                for i in newPos:
+                    move['new_position'] = i
+                    moves.app
+    elif isSameTile(state['tile'],tuileCouloir) or isSameTile(turn_tile(state['tile']),tuileCouloir):
+        for i in range(2):
+            state['tile'] = turn_tile(turn_tile(state['tile']))
+            for gate in GATES:
+                if GATES[gate]['end'] not in state['positions']:
+                    move ={
+                    "tile": state['tile'],
+                    "gate": gate
+                    }
+                    tempState = update(state,move)
+                    newPos = validNewPos(returnPos(tempState),tempState['board'])
+                    for i in newPos:
+                        move['new_position'] = i
+                        moves.app
+    else:
+        for cardinal in DIRECTIONS:
+            state['tile'] = turn_tile(state['tile'])
+            for gate in GATES:
+                if GATES[gate]['end'] not in state['positions']:
+                    move ={
+                    "tile": state['tile'],
+                    "gate": gate
+                    }
+                    tempState = update(state,move)
+                    newPos = validNewPos(returnPos(tempState),tempState['board'])
+                    for i in newPos:
+                        move['new_position'] = i
+                        moves.append(move)    
+    return moves
 def evalState(state):#return le poids de la situation
     return 0
+def update(state,move):
+    state['board'],state['tile'] = slideTiles(state['board'],move['tile'],move['gate'])
+    new_positions = []
+    for position in state["positions"]:
+        if onTrack(position, move['gate']):
+            if position == GATES[move['gate']]["end"]:
+                new_positions.append(GATES[move['gate']]["start"])
+                continue
+            new_positions.append(position + GATES[move['gate']]["inc"])
+            continue
+        new_positions.append(position)
+    state["positions"] = new_positions
+    return state
+
 def negamax(board,depth,player):
     return 0
-def update(state,move):
-    return 0
-
 #ANCIENNE VERSION
 """
 def transformPath(status):#Transforme notre labyrinthe en quelque chose de baucoup plus facile a manipuler
@@ -188,9 +245,6 @@ def findtreasure(plateau):
             if plateau[i][j].statue == "start":
                 rdfs(i, j, [], visites)
     return positions_tresors
-
-
-
 
 def index2coords(index):
     return index // 7, index % 7
