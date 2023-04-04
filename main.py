@@ -221,7 +221,7 @@ class Negamax:
         output = {
             "response": "move",
             "move": move,
-            "message": "I'm random and stupid"
+            "message": "I'm smart but god damn am I slow"
         }
         return output
         
