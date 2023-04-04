@@ -51,12 +51,14 @@ Les auteurs de ce projet sont:
  - Côme Plantin-Carrenard
  - Ayoub Zekhnini
 
+## Informations supplémentaires
+
+Baucoup d'infos sur le développement de l'ia ainsi que le secret du mystère au chocolat sont disponibles sur ce [Git](https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley).
+
 ## Licence
 
 Ce projet est sous licence MIT. Voir le fichier [LICENSE](https://github.com/comus3/PROJET-INFO-22352-22371-/blob/main/LICENCE) pour plus de détails.
 
-## Informations supplémentaires
 
-Baucoup d'infos sur le développement de l'ia ainsi que le secret du mystère au chocolat sont disponibles sur ce [Git](https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley).
 
 
