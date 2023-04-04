@@ -14,7 +14,7 @@ L'IA est capable de :
 
 ## Comment utiliser
 
-Le projet est disponible sur [GitHub](https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley). Pour utiliser l'IA, vous devez :
+Pour utiliser l'IA, vous devez :
 
 1. Cloner le repository :
 ```bash
@@ -52,4 +52,9 @@ Ce projet a été réalisé par Côme Plantin-Carrenard et Ayoub Zekhnini.
 ## Licence
 
 Ce projet est sous licence MIT. Voir le fichier [LICENSE](https://github.com/comus3/PROJET-INFO-22352-22371-/blob/main/LICENCE) pour plus de détails.
+
+## Informations supplémentaires
+
+Baucoup d'infos sur le développement de l'ia sont disponibles sur ce [Git](https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley)
+
 
