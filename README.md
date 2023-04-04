@@ -3,6 +3,7 @@
 ## Introduction
 
 Ce projet consiste en la réalisation d'une intelligence artificielle pour le jeu Labyrinthe. L'objectif est de participer à un championnat organisé entre toutes les IA du laboratoire.
+Chaque IA communiquera avec un serveur central dont le code peut être trouvé [ici](https://github.com/qlurkin/PI2CChampionshipRunner).
 
 ## Fonctionnalités
 
@@ -18,10 +19,7 @@ Pour utiliser l'IA, vous devez :
 
 1. Cloner le repository :
 ```bash
-git clone https://github.com/VOTRE_NOM/Labyrinthe-AI.git
-```
-```bash
-git clone https://github.com/VOTRE_NOM/Labyrinthe-AI.git
+git clone https://github.com/comus3/PROJET-INFO-22352-22371-
 ```
 2. Installer les dépendances :
 ```bash
