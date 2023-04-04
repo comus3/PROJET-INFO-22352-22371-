@@ -46,8 +46,10 @@ En cas d'impossibilité de trouver un chemin vers le trésor, que ce soit pour n
 
 
 ## Auteurs
+Les auteurs de ce projet sont:
 
-Ce projet a été réalisé par Côme Plantin-Carrenard et Ayoub Zekhnini.
+ - Côme Plantin-Carrenard
+ - Ayoub Zekhnini
 
 ## Licence
 
@@ -55,6 +57,6 @@ Ce projet est sous licence MIT. Voir le fichier [LICENSE](https://github.com/com
 
 ## Informations supplémentaires
 
-Baucoup d'infos sur le développement de l'ia sont disponibles sur ce [Git](https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley)
+Baucoup d'infos sur le développement de l'ia ainsi que le secret du mystère au chocolat sont disponibles sur ce [Git](https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley).
 
 
