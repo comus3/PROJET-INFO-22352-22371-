@@ -262,7 +262,7 @@ def negamax(state, depth, player):
         return player * evalState(state)
     best_value = float('-inf')
     for move in availableMoves(state):
-        newState = update(state,move)
+        newState = move['state']
         value = -negamax(newState, depth - 1, -player)
         best_value = max(best_value, value)
     return best_value

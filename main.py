@@ -198,7 +198,7 @@ class Negamax:
     #pour quel move var1-var2 est minimum? --- faire ce move
     def __init__(self,state):
         self.state = state
-        self.depth = 2      # /!\ MODIFIER LE POID ICI /!\
+        self.depth = 2      # /!\ MODIFIER La PRofondeur ICI /!\
         self.player = 1
         self.mode = 'intesive'
     def nextMove(self,state,name):
