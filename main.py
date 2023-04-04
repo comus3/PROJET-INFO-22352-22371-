@@ -56,6 +56,8 @@ class IA:
             self.modele = Random([])
         elif modele == "RDFC":
             self.modele = RDFC([])
+        elif modele == "negamax":
+            self.modele = Negamax([])
         else:
             self.modele = Random([])
         listeIA.append(self)
@@ -196,14 +198,14 @@ class Negamax:
     #pour quel move var1-var2 est minimum? --- faire ce move
     def __init__(self,state):
         self.state = state
-        self.depth = 1      # /!\ MODIFIER LE POID ICI /!\
+        self.depth = 2      # /!\ MODIFIER LE POID ICI /!\
         self.player = 1
         self.mode = 'intesive'
     def nextMove(self,state,name):
         bestMove = None
         bestValue = float('-inf')
-        for move in validNewPos(state):
-            newState = update(state,move)
+        for move in availableMoves(state):
+            newState = move['state']
             value = -negamax(newState, self.depth - 1,-self.player)
             if value > bestValue:
                 bestValue = value
@@ -212,9 +214,9 @@ class Negamax:
             newModel = Random(state)
             output = newModel.nextMove(state)
         move ={
-            "tile": move['tile'],
-            "gate": move['gate'],
-            "new_position": move['newPos']
+            "tile": bestMove['tile'],
+            "gate": bestMove['gate'],
+            "new_position": bestMove['new_position']
         }
         output = {
             "response": "move",

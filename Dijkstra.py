@@ -1,11 +1,9 @@
-import sys
-
 class Vertex:
     def __init__(self, node):
         self.id = node
         self.adjacent = {}
         # Set distance to infinity for all nodes
-        self.distance = sys.maxint
+        self.distance = 1000
         # Mark all nodes unvisited        
         self.visited = False  
         # Predecessor
@@ -51,7 +49,6 @@ class Graph:
         new_vertex = Vertex(node)
         self.vert_dict[node] = new_vertex
         return new_vertex
-
     def get_vertex(self, n):
         if n in self.vert_dict:
             return self.vert_dict[n]
@@ -75,6 +72,13 @@ class Graph:
 
     def get_previous(self, current):
         return self.previous
+    """
+    def node_exists(graph, node_id):#rajouté par Côme pour savoir si un node existe deja
+        for node in graph:
+            if node.id == node_id:
+                return True
+        return False
+    """
 
 def shortest(v, path):
     ''' make shortest path from v.previous'''
@@ -88,15 +92,14 @@ import heapq#c'est la queue
 def dijkstra(aGraph, start):
     # Set the distance for the start node to zero 
     start.set_distance(0)
-
     # Put tuple pair into the priority queue
-    unvisited_queue = [(v.get_distance(),v) for v in aGraph]
+    unvisited_queue = [(v.get_distance(),v.get_id(),v) for v in aGraph]
     heapq.heapify(unvisited_queue)
 
     while len(unvisited_queue):
         # Pops a vertex with the smallest distance 
         uv = heapq.heappop(unvisited_queue)
-        current = uv[1]
+        current = uv[2]
         current.set_visited()
 
         #for next in v.adjacent:
@@ -117,43 +120,22 @@ def dijkstra(aGraph, start):
         while len(unvisited_queue):
             heapq.heappop(unvisited_queue)
         # 2. Put all vertices not visited into the queue
-        unvisited_queue = [(v.get_distance(),v) for v in aGraph if not v.visited]
+        unvisited_queue = [(v.get_distance(),v.get_id(),v) for v in aGraph if not v.visited]
         heapq.heapify(unvisited_queue)
 
 
-if __name__ == '__main__':
-
-    g = Graph()
-
-    g.add_vertex('a')
-    g.add_vertex('b')
-    g.add_vertex('c')
-    g.add_vertex('d')
-    g.add_vertex('e')
-    g.add_vertex('f')
-
-    g.add_edge('a', 'b', 7)  
-    g.add_edge('a', 'c', 9)
-    g.add_edge('a', 'f', 14)
-    g.add_edge('b', 'c', 10)
-    g.add_edge('b', 'd', 15)
-    g.add_edge('c', 'd', 11)
-    g.add_edge('c', 'f', 2)
-    g.add_edge('d', 'e', 6)
-    g.add_edge('e', 'f', 9)
-
-    for v in g:
-        for w in v.get_connections():
-            vid = v.get_id()
-            wid = w.get_id()
-
-            
-    dijkstra(g, g.get_vertex('a')) 
-
-    target = g.get_vertex('e')
-    path = [target.get_id()]
-    shortest(target, path)
- 
-
 
 ####### SOURCE   :   https://www.bogotobogo.com/python/python_Dijkstras_Shortest_Path_Algorithm.php
+####### Je pense que l'article date de il y a longtemps donc heapq marche légèrement différemment
+####### donc quand on faut un heapify, il veut comparer deux vertex et il est pas content donc je vais 
+####### rajouter des comparateurs dans la classe vertex
+
+####### AUTRE SOLUCE:
+####### comme heap va comparer le premier elem du tuple et si egaux il va comparer le deuxieme ,ect
+####### jai juste rajouté le id du vertex au tuple vu qu'ils sont tous différents donc quand poids identiques
+####### il va comparer id et va le trier dans cet ordre
+#######
+#######
+#######
+#######
+#######
