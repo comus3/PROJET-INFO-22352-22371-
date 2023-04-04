@@ -195,7 +195,7 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
                         move['state'] = tempState
                         moves.append(move)    
     return moves
-def evalState(state):#return le poids de la situation
+def evalState(state,player):#return le poids de la situation
     debut = returnPos(state)
     g = transformPath(state['board'],debut)
     dijkstra(g, g.get_vertex(debut))
@@ -203,11 +203,16 @@ def evalState(state):#return le poids de la situation
     if end != None:
         path = [end.get_id()]
         shortest(end, path)
-        if shortest != None:
-            return len(shortest(end, path))
-        else: return float('inf')
+        if type(path) != None:
+            printShortestPath(path)
+            printGraph(g)
+            return player*len(path)
+        else:
+            if player == 1:return float('inf')
+            else : return -1000
     else:
-        return float('inf')
+        if player == 1:return float('inf')
+        else : return -1000
 def update(state,move):
     a,b = slideTiles(state['board'],move['tile'],move['gate'])
     state['board'] = a
@@ -259,7 +264,7 @@ def transformPath(board,debut):
     return g
 def negamax(state, depth, player):
     if depth == 0:
-        return player * evalState(state)
+        return evalState(state,player)
     best_value = float('-inf')
     for move in availableMoves(state):
         newState = move['state']
@@ -278,7 +283,15 @@ def stackedTile(pos,board):
                 liste.append(board[tilePos][DIRECTIONS[cardinal]['opposite']])
             newTile[cardinal] = all(liste)
     return newTile
-
+def printGraph(graph):
+    print('Graph data:')
+    for v in graph:
+        for w in v.get_connections():
+            vid = v.get_id()
+            wid = w.get_id()
+            print( '( %s , %s, %3d)'  % ( vid, wid, v.get_weight(w)))
+def printShortestPath(path):
+    print ('The shortest path : %s' %(path[::-1]))
 #ANCIENNE VERSION(plus utilisée car classe dans Dijkstra meilleure et plus opti)
 """
 def transformPath(status):#Transforme notre labyrinthe en quelque chose de baucoup plus facile a manipuler

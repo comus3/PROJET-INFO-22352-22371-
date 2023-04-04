@@ -213,6 +213,7 @@ class Negamax:
         if bestMove == None:
             newModel = Random(state)
             output = newModel.nextMove(state)
+            return output
         move ={
             "tile": bestMove['tile'],
             "gate": bestMove['gate'],
