@@ -214,6 +214,7 @@ class Negamax:
             newModel = Random(state)
             output = newModel.nextMove(state)
             return output
+        print('best value is :  ' + str(bestValue))
         move ={
             "tile": bestMove['tile'],
             "gate": bestMove['gate'],
@@ -224,6 +225,7 @@ class Negamax:
             "move": move,
             "message": "I'm smart but god damn am I slow"
         }
+        print(output)
         return output
         
 
