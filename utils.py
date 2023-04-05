@@ -206,13 +206,13 @@ def evalState(state,player):#return le poids de la situation
         if type(path) != None:
             printShortestPath(path)
             printGraph(g)
-            return player*len(path)
+            return 0-(player*len(path))
         else:
-            if player == 1:return float('inf')
-            else : return -1000
+            if player == 1:return 1000
+            else : return 100
     else:
-        if player == 1:return float('inf')
-        else : return -1000
+        if player == 1:return 1000
+        else : return 100
 def update(state,move):
     a,b = slideTiles(state['board'],move['tile'],move['gate'])
     state['board'] = a
@@ -283,6 +283,9 @@ def stackedTile(pos,board):
                 liste.append(board[tilePos][DIRECTIONS[cardinal]['opposite']])
             newTile[cardinal] = all(liste)
     return newTile
+
+
+ 
 def printGraph(graph):
     print('Graph data:')
     for v in graph:
