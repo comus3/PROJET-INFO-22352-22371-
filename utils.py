@@ -178,7 +178,6 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
                     move['state'] = tempState
                     res = copy.deepcopy(move)
                     moves.append(res)
-                return moves
     for cardinale in tuileCouloir:#ici j'utilise tuile couloir parceque je veux juste iterer les cardinaux mais on peut faire "plus simple"(je trouve que ca change rien)
         temp.append(state['tile'][cardinale])
         shorTile[cardinale] = state['tile'][cardinale]
@@ -192,6 +191,7 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
         for cardinal in tuileCouloir:
             state['tile'] = turn_tile(state['tile'])
             iterGates(state,newPos)
+    return moves
 def evalState(state,player):#return le poids de la situation
     #ANCIENNE VERSION DU CALCUL DE POIDS MAINTENANT OBSCELETTE
     """
@@ -217,11 +217,14 @@ def evalState(state,player):#return le poids de la situation
     debutA = returnPos(state)
     gA = transformPath(state['board'],debutA)
     dijkstra(gA, gA.get_vertex(debutA))
-    end = gA.get_vertex(treasurePos(state))
+    endPos = treasurePos(state)
+    end = gA.get_vertex(endPos)
     if end != None:
         weight = end.get_distance()
     else:
-        weight = 50
+        xa,ya = index2coords(debutA)
+        xb,yb = index2coords(endPos)
+        weight = abs(xb-xa+yb-ya)*2
     """ici, nous pouvons print le graphe obtenu ainsi que calculer le path le plus court vers end avec la methode path(prendre exemple sur l'ancienne version ci dessus)."""
     #création du deuxième graphe
     debutB = returnEnemyPos(state)
@@ -230,7 +233,7 @@ def evalState(state,player):#return le poids de la situation
     porteeEnemi = 0
     for i in gB:
         porteeEnemi = porteeEnemi + i.get_distance()
-    return player*(100-(porteeEnemi+(3*weight)))*(100-weight)
+    return player*(1000-(porteeEnemi+(3*weight)))*(1000-weight)
 def update(state,move):
     a,b = slideTiles(state['board'],move['tile'],move['gate'])
     state['board'] = a
