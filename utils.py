@@ -15,7 +15,11 @@ for i in range(500):
 #listnames = ["thomas","top",'nickel','super','ultra','bazarDuGrenier','leLApib','Bat','LEPHOENIX','equateur','tongo','tango','charlie','hebdo','lemecaudessusdemoiestnul','hexadecimal']
 index = 0
 
-
+onTrackDict = {0: ['A', 'I', 'L', 'D'], 1: ['A', 'I', 'D', 'L'], 2: ['A', 'I', 'B', 'H', 'D', 'L'], 3: ['B', 'H', 'D', 'L'], 4: ['B', 'H', 'C', 'G', 'D', 'L'], 5: ['C', 'G', 'D', 'L'], 6: ['C', 'G', 'D', 'L'], 7: ['L', 'D', 'A', 'I'], 8: ['L', 'D', 'A', 'I'], 9: ['A', 'I', 'B', 'H', 'L', 'D'], 10: ['B', 'H', 'L', 'D'], 11: ['B', 'H', 'C', 'G', 'L', 'D'], 12: ['C', 'G', 'L', 
+'D'], 13: ['C', 'G', 'L', 'D'], 14: ['L', 'D', 'K', 'E', 'A', 'I'], 15: ['L', 'D', 'K', 'E', 'A', 'I'], 16: ['L', 'D', 'K', 'E', 'A', 'I', 'B', 'H'], 17: ['L', 'D', 'E', 'K', 'B', 'H'], 18: ['B', 'H', 'C', 'G', 'L', 'D', 'K', 'E'], 19: ['C', 
+'G', 'L', 'D', 'K', 'E'], 20: ['C', 'G', 'D', 'L', 'E', 'K'], 21: ['K', 'E', 'A', 'I'], 22: ['K', 'E', 'A', 'I'], 23: ['A', 'B', 'I', 'H', 'K', 'E'], 24: ['B', 'H', 'K', 'E'], 25: ['K', 'E', 'B', 'H', 'C', 'G'], 26: ['K', 'E', 'C', 'G'], 27: 
+['K', 'E', 'C', 'G'], 28: ['K', 'E', 'J', 'F', 'A', 'I'], 29: ['K', 'E', 'J', 'F', 'A', 'I'], 30: ['K', 'E', 'J', 'F', 'A', 'I', 'B', 'H'], 31: ['K', 'E', 'J', 'F', 'B', 'H'], 32: ['K', 'E', 'J', 'F', 'B', 'C', 'G', 'H'], 33: ['K', 'E', 'J', 
+'F', 'C', 'G'], 34: ['K', 'E', 'J', 'F', 'C', 'G'], 35: ['J', 'F', 'A', 'I'], 36: ['J', 'F', 'A', 'I'], 37: ['J', 'F', 'A', 'I', 'B', 'H'], 38: ['J', 'F', 'B', 'H'], 39: ['J', 'F', 'B', 'H', 'C', 'G'], 40: ['J', 'F', 'C', 'G'], 41: ['J', 'F', 'C', 'G'], 42: ['J', 'F', 'A', 'I'], 43: ['J', 'F', 'I', 'A'], 44: ['J', 'F', 'I', 'A', 'B', 'H'], 45: ['J', 'F', 'B', 'H'], 46: ['J', 'F', 'B', 'H', 'C', 'H'], 47: ['J', 'F', 'C', 'G'], 48: ['J', 'F', 'C', 'G']}
 
 responseToPing ={
        "response": "pong"
@@ -92,8 +96,13 @@ def jsonEncode(message):
     
 
 ####Négamax
-def whichGates(state):
-    return 0
+def whichGates(positions):
+    outPut = []
+    for pos in positions:
+        for gate in onTrackDict[pos]:
+            if gate not in outPut:
+                outPut.append(gate)
+    return outPut
 def validNewPos(playerPos,board,stacked = None):#return une liste de nouvelles positions valides sur la carte ENTREE: Player position on board and the board
     validPositions = []
     #J'ai commencé a réécrire cette fonction car il y a de la place pour l'optimisation
@@ -152,7 +161,9 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
     moves = []
     temp = []
     shorTile = {}
-    def iterGates(state):
+    newPos = validNewPos(returnPos(state),state['board'])
+    changeGate = whichGates(newPos)
+    def iterGates(state,newPos):
         for gate in GATES:
             if GATES[gate]['end'] not in state['positions']:
                 move ={
@@ -160,7 +171,8 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
                 "gate": gate
                 }
                 tempState = update(state,move)
-                newPos = validNewPos(returnPos(tempState),tempState['board'])
+                if gate in changeGate:
+                    newPos = validNewPos(returnPos(tempState),tempState['board'])
                 for i in newPos:
                     move['new_position'] = i
                     move['state'] = tempState
@@ -169,15 +181,15 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
         temp.append(state['tile'][cardinale])
         shorTile[cardinale] = state['tile'][cardinale]
     if all(temp) or not any(temp):
-        iterGates(state)
+        iterGates(state,newPos)
     elif isSameTile(shorTile,tuileCouloir):
         for i in range(2):
             state['tile'] = turn_tile(turn_tile(state['tile']))
-            iterGates(state)
+            iterGates(state,newPos)
     else:
         for cardinal in tuileCouloir:
             state['tile'] = turn_tile(state['tile'])
-            iterGates(state)
+            iterGates(state,newPos)
     return moves
 def evalState(state,player):#return le poids de la situation
     #ANCIENNE VERSION DU CALCUL DE POIDS MAINTENANT OBSCELETTE
