@@ -1,7 +1,7 @@
 import json
 import random
 from utils import *
-
+import time
 
 #### ---FAIT---    ######CREER CLASSE QUI VA CREER DES OBJETS IA, CHAQUE OBJET IA A UN ATRIBUT Active LES OBJETS SAPPELLLENT IA ET SONT RANGES DANS UNE LISTE
 #aussi un attribut socket qui est son socket
@@ -236,6 +236,43 @@ class Negamax:
 
 
 
+class nwpi:
+    def __init__(self, state, player, timeout=0.2):
+        self.state = state
+        self.player = player
+        self.timeout = timeout
+        self.cache = defaultdict(lambda: 0)
+
+    def nextMove(self):
+        value, move = 0, None
+        depth = 1
+        start = time.time()
+        over = False
+        while value > -9 and time.time() - start < self.timeout and not over:
+            value, move, over = self.cachedNegamaxWithPruningLimitedDepth(self.state, self.player, depth)
+            depth += 1
+        return move
+
+    def cachedNegamaxWithPruningLimitedDepth(self, state, player, depth, alpha=float('-inf'), beta=float('inf')):
+        over = gameOver(state)
+        if over or depth == 0:
+            res = -heuristic(state, player), None, over
+
+        else:
+            theValue, theMove, theOver = float('-inf'), None, True
+            possibilities = [(move, apply(state, move)) for move in moves(state)]
+            possibilities.sort(key=lambda poss: self.cache[tuple(poss[1])])
+            for move, successor in reversed(possibilities):
+                value, _, over = self.cachedNegamaxWithPruningLimitedDepth(successor, player%2+1, depth-1, -beta, -alpha)
+                theOver = theOver and over
+                if value > theValue:
+                    theValue, theMove = value, move
+                alpha = max(alpha, theValue)
+                if alpha >= beta:
+                    break
+            res = -theValue, theMove, theOver
+        self.cache[tuple(state)] = res[0]
+        return res
 
 
 ####################### EMULATEURS JEU  ################################
