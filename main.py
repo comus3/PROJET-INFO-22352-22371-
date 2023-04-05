@@ -1,7 +1,7 @@
 import json
 import random
 from utils import isSameTile,turn_tile,random_turn_tile,showState,validMoves
-
+import time 
 
 #### ---FAIT---    ######CREER CLASSE QUI VA CREER DES OBJETS IA, CHAQUE OBJET IA A UN ATRIBUT Active LES OBJETS SAPPELLLENT IA ET SONT RANGES DANS UNE LISTE
 #aussi un attribut socket qui est son socket
