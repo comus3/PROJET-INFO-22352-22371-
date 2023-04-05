@@ -152,7 +152,8 @@ def validNewPos(playerPos,board,stacked = None):#return une liste de nouvelles p
 def treasurePos(status):#return la position du trésor recherché
     for i in range(49):
         if status['board'][i]['item'] == status['target']:
-            return int(i)     
+            return int(i)
+        return(90)   
 def returnPos(status):
     return status['positions'][status['current']]
 def returnEnemyPos(status):
@@ -462,7 +463,8 @@ def slideTiles(board, free, gate):
         dest = src
         src -= inc
     new_board[start] = free
-    return new_board, new_free
+    outPut = (new_board, new_free)
+    return outPut
 def onTrack(index, gate):
     return index in range(
         GATES[gate]["start"],
