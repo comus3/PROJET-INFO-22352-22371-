@@ -15,6 +15,9 @@ class Vertex:
     def get_connections(self):
         return self.adjacent.keys()  
 
+    def get_adjacent_count(self):#Rajouté par côme pour return le dict de adj
+        return len(self.adjacent)
+
     def get_id(self):
         return self.id
 

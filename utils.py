@@ -144,6 +144,8 @@ def treasurePos(status):#return la position du trésor recherché
             return int(i)     
 def returnPos(status):
     return status['positions'][status['current']]
+def returnEnemyPos(status):
+    return status['positions'][1-status['current']]
 def availableMoves(state):#return les moves possibles pour apres aller itérer dedans
     moves = []
     temp = []
@@ -164,7 +166,7 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
                     move['new_position'] = i
                     move['state'] = tempState
                     moves.append(move)
-    elif isSameTile(shorTile,tuileCouloir) or isSameTile(shorTile,tuileCouloir):
+    elif isSameTile(shorTile,tuileCouloir):
         for i in range(2):
             state['tile'] = turn_tile(turn_tile(state['tile']))
             for gate in GATES:
@@ -196,6 +198,8 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
                         moves.append(move)    
     return moves
 def evalState(state,player):#return le poids de la situation
+    #ANCIENNE VERSION DU CALCUL DE POIDS MAINTENANT OBSCELETTE
+    """
     debut = returnPos(state)
     g = transformPath(state['board'],debut)
     dijkstra(g, g.get_vertex(debut))
@@ -213,6 +217,25 @@ def evalState(state,player):#return le poids de la situation
     else:
         if player == 1:return 1000
         else : return 100
+    """
+    #création du premier graphe
+    debutA = returnPos(state)
+    gA = transformPath(state['board'],debutA)
+    dijkstra(gA, gA.get_vertex(debutA))
+    end = gA.get_vertex(treasurePos(state))
+    if end != None:
+        weight = end.get_distance()
+    else:
+        weight = 50
+    """ici, nous pouvons print le graphe obtenu ainsi que calculer le path le plus court vers end avec la methode path(prendre exemple sur l'ancienne version ci dessus)."""
+    #création du deuxième graphe
+    debutB = returnEnemyPos(state)
+    gB = transformPath(state['board'],debutB)
+    dijkstra(gB, gB.get_vertex(debutB))
+    porteeEnemi = 0
+    for i in gB:
+        porteeEnemi = porteeEnemi + i.get_distance()
+    return player*(100-(porteeEnemi+(3*weight)))*(100-weight)
 def update(state,move):
     a,b = slideTiles(state['board'],move['tile'],move['gate'])
     state['board'] = a
@@ -285,7 +308,7 @@ def stackedTile(pos,board):
     return newTile
 
 
- 
+#section print
 def printGraph(graph):
     print('Graph data:')
     for v in graph:
@@ -295,7 +318,9 @@ def printGraph(graph):
             print( '( %s , %s, %3d)'  % ( vid, wid, v.get_weight(w)))
 def printShortestPath(path):
     print ('The shortest path : %s' %(path[::-1]))
-#ANCIENNE VERSION(plus utilisée car classe dans Dijkstra meilleure et plus opti)
+
+
+#ANCIENNE VERSION de transform graph(plus utilisée car classe dans Dijkstra meilleure et plus opti)
 """
 def transformPath(status):#Transforme notre labyrinthe en quelque chose de baucoup plus facile a manipuler
     class Nodes:
