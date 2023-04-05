@@ -92,6 +92,8 @@ def jsonEncode(message):
     
 
 ####Négamax
+def whichGates(state):
+    return 0
 def validNewPos(playerPos,board,stacked = None):#return une liste de nouvelles positions valides sur la carte ENTREE: Player position on board and the board
     validPositions = []
     #J'ai commencé a réécrire cette fonction car il y a de la place pour l'optimisation
@@ -150,10 +152,7 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
     moves = []
     temp = []
     shorTile = {}
-    for cardinale in tuileCouloir:#ici j'utilise tuile couloir parceque je veux juste iterer les cardinaux mais on peut faire "plus simple"(je trouve que ca change rien)
-        temp.append(state['tile'][cardinale])
-        shorTile[cardinale] = state['tile'][cardinale]
-    if all(temp) or not any(temp):
+    def iterGates(state):
         for gate in GATES:
             if GATES[gate]['end'] not in state['positions']:
                 move ={
@@ -166,36 +165,19 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
                     move['new_position'] = i
                     move['state'] = tempState
                     moves.append(move)
+    for cardinale in tuileCouloir:#ici j'utilise tuile couloir parceque je veux juste iterer les cardinaux mais on peut faire "plus simple"(je trouve que ca change rien)
+        temp.append(state['tile'][cardinale])
+        shorTile[cardinale] = state['tile'][cardinale]
+    if all(temp) or not any(temp):
+        iterGates(state)
     elif isSameTile(shorTile,tuileCouloir):
         for i in range(2):
             state['tile'] = turn_tile(turn_tile(state['tile']))
-            for gate in GATES:
-                if GATES[gate]['end'] not in state['positions']:
-                    move ={
-                    "tile": state['tile'],
-                    "gate": gate
-                    }
-                    tempState = update(state,move)
-                    newPos = validNewPos(returnPos(tempState),tempState['board'])
-                    for i in newPos:
-                        move['new_position'] = i
-                        move['state'] = tempState
-                        moves.append(move)
+            iterGates(state)
     else:
         for cardinal in tuileCouloir:
             state['tile'] = turn_tile(state['tile'])
-            for gate in GATES:
-                if GATES[gate]['end'] not in state['positions']:
-                    move ={
-                    'tile' : state['tile'],
-                    'gate' : gate
-                    }
-                    tempState = update(state,move)
-                    newPos = validNewPos(returnPos(tempState),tempState['board'])
-                    for i in newPos:
-                        move['new_position'] = i
-                        move['state'] = tempState
-                        moves.append(move)    
+            iterGates(state)
     return moves
 def evalState(state,player):#return le poids de la situation
     #ANCIENNE VERSION DU CALCUL DE POIDS MAINTENANT OBSCELETTE
