@@ -1,6 +1,6 @@
 import json
 import random
-from utils import isSameTile,turn_tile,random_turn_tile,showState,validMoves
+from utils import *
 import time
 
 #### ---FAIT---    ######CREER CLASSE QUI VA CREER DES OBJETS IA, CHAQUE OBJET IA A UN ATRIBUT Active LES OBJETS SAPPELLLENT IA ET SONT RANGES DANS UNE LISTE
@@ -8,10 +8,7 @@ import time
 #chaque objet ia possede uun attribut modèle qui pinte vers la fonction a utiliser pour calculer le next move
 #ecdrire le premier modèle
 #### ---A FAIRE--- ######
-#-Simulateur du jeu
 #-modele d'ia
-#testing
-#ceci est ma brainche
 
 GATES = {
     "A": {"start": 1, "end": 43, "inc": 7},
@@ -37,7 +34,7 @@ DIRECTIONS = {
     (0, -1): {"name": "W"},
     (0, 1): {"name": "E"},
 }
-
+nonBouges = [0,2,4,6,14,16,18,20,28,30,32,34,32,34,36,38]
 listeIA = []
 gateList = ["A","B","C","D","E","F","G","H","I","J","K","L"]
 
@@ -57,22 +54,24 @@ class IA:
             self.modele = Manuel([])
         elif modele == "random":
             self.modele = Random([])
-        #elif modele == "rdfc":
-        #    self.modele = RDFC([])
+        elif modele == "RDFC":
+            self.modele = RDFC([])
+        elif modele == "negamax":
+            self.modele = Negamax([])
         else:
             self.modele = Random([])
         listeIA.append(self)
         self.name = name
+    def __str__(self):
+        print("je suis l'ia associée au port" + str(self.port) + "  mon nom est : "+ self.name)
 
     def think(self,msg):
         self.state = msg
-        print("")
         print("message pour "+self.name)
-        return self.modele.nextMove(msg,self.name)
+        return self.modele.nextMove(self.state,self.name)
 
     def kill(self):
         self.active = False
-        
         
 
 ####################### MODèLES IA  ################################
@@ -82,23 +81,19 @@ class Manuel:
         self.state = state
         self.history = []
     def nextMove(self,status,name):
-        cardinaux = [False,False,False,False]
         print("status:\n")
+        #print("voici ce que contient le noveayx" + transformPath(status))
         showState(status)
         user_input_orientation = str(input("orientation? (N/E/S/W... 1 et 0)   >>"))
         user_input_gate = input("which gate..?  \n>>")
-        user_input_newpos = input("and new pos? \n>>")
+        user_input_newpos = int(input("and new pos? \n>>"))
         try:
-            j = 0
-            for i in user_input_orientation:
-                cardinaux[j] = bool(i)
-                j= j+1
-            tile ={
-                "N": cardinaux[0],
-                "E": cardinaux[1],
-                "S": cardinaux[2],
-                "W": cardinaux[3],
-                "item": 1
+            tile = {
+                "N": bool(int(user_input_orientation[0])),
+                "E": bool(int(user_input_orientation[1])),
+                "S": bool(int(user_input_orientation[2])),
+                "W": bool(int(user_input_orientation[3])),
+                "item": status['tile']['item']
             }
             move ={
                 "tile": tile,
@@ -108,12 +103,12 @@ class Manuel:
             output = {
                 "response": "move",
                 "move": move,
-                "message": "Y o Y"
+                "message": "EMANUEL la menace"
             }
             return output
-        except:
-            print('erreur au moment de créer la réponse, veuillez reessayer')
-            self.nextMove(status)
+        except Exception as e:
+            print('erreur au moment de créer la réponse, veuillez reessayer     ',e)
+            self.nextMove(self,status,name)
 
             
 class Random:
@@ -121,11 +116,24 @@ class Random:
         self.state = state
     def nextMove(self,state,name):
         tile = random_turn_tile(state['tile'])
-        gateIndex = random.randint(0,11)
-        gate = gateList[gateIndex]
-        ValidDirections = validMoves(state,name)
-        temp = len(ValidDirections)-1
-        positionIndex = random.randint(0,temp)
+        while True:
+            gateIndex = random.randint(0,11)
+            gate = gateList[gateIndex]
+            if GATES[gate]['end'] not in state['positions']:
+                break
+        newBoard,newTile = slideTiles(state['board'],tile,gate)
+        new_positions = []
+        for position in state["positions"]:
+            if onTrack(position, gate):
+                if position == GATES[gate]["end"]:
+                    new_positions.append(GATES[gate]["start"])
+                    continue
+                new_positions.append(position + GATES[gate]["inc"])
+                continue
+            new_positions.append(position)
+        state["positions"] = new_positions
+        ValidDirections = validNewPos(returnPos(state),newBoard)
+        positionIndex = random.randint(0,len(ValidDirections)-1)
         newPosition = ValidDirections[positionIndex]
         move ={
             "tile": tile,
@@ -139,26 +147,12 @@ class Random:
         }
         return output
     
-"""
+
 class RDFC:
     def __init__(self,state):
         self.state = state
-
-    def __str__(self):
-        print("je suis l'ia associée au port" + str(self.port) + "  mon nom est : "+ self.name)
-    
-    def index2coords(index):
-        return index // 7, index % 7
-
-    def coords2index(i, j):
-        return i * 7 + j
-    
-    def isCoordsValid(i, j):
-        return i >= 0 and i < 7 and j >= 0 and i < 7
-    
-    def add(A, B):
-        return tuple(a + b for a, b in zip(A, B))
-    def nextMove(self, start, end, board):   # (self,statue )
+    def nextMove(self,state,name):   # (self,statue )
+        start, end, board = returnPos(state),treasurePos(state),state['board']
         def successors(index):
             res = []
             directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
@@ -197,11 +191,50 @@ class RDFC:
             node = parent[node]
 
         return list(reversed(res))
+    
+
+class Negamax:
+    #for i in moves possibles(ok si je fais un certain move dans les tuiles, quel est la longueur du meilleur pour moi?--> var1 et pour lui --> var2)
+    #pour quel move var1-var2 est minimum? --- faire ce move
+    def __init__(self,state):
+        self.state = state
+        self.depth = 2      # /!\ MODIFIER La PRofondeur ICI /!\
+        self.player = 1
+        self.mode = 'intesive'
+    def nextMove(self,state,name):
+        bestMove = None
+        bestValue = float('-inf')
+        for move in availableMoves(state):
+            newState = move['state']
+            value = -negamax(newState, self.depth - 1,-self.player)
+            if value > bestValue:
+                bestValue = value
+                bestMove = move
+        if bestMove == None:
+            newModel = Random(state)
+            output = newModel.nextMove(state)
+            return output
+        print('best value is :  ' + str(bestValue))
+        move ={
+            "tile": bestMove['tile'],
+            "gate": bestMove['gate'],
+            "new_position": bestMove['new_position']
+        }
+        output = {
+            "response": "move",
+            "move": move,
+            "message": "I'm smart but god damn am I slow"
+        }
+        print(output)
+        return output
+        
+
+        
         
         
     
 
-"""
+
 
 class nwpi:
     def __init__(self, state, player, timeout=0.2):

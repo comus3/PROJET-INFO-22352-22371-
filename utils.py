@@ -2,6 +2,7 @@ import socket
 import json
 import copy
 import random
+from Dijkstra import *
 
 ####    ---FAIT---  ###### quelques fonctions de comm
 ####    ---A FAIRE--- #### 
@@ -14,13 +15,55 @@ for i in range(500):
 #listnames = ["thomas","top",'nickel','super','ultra','bazarDuGrenier','leLApib','Bat','LEPHOENIX','equateur','tongo','tango','charlie','hebdo','lemecaudessusdemoiestnul','hexadecimal']
 index = 0
 
+
+
 responseToPing ={
        "response": "pong"
     }
 
 
+GATES = {
+    "A": {"start": 1, "end": 43, "inc": 7},
+    "B": {"start": 3, "end": 45, "inc": 7},
+    "C": {"start": 5, "end": 47, "inc": 7},
+    "D": {"start": 13, "end": 7, "inc": -1},
+    "E": {"start": 27, "end": 21, "inc": -1},
+    "F": {"start": 41, "end": 35, "inc": -1},
+    "G": {"start": 47, "end": 5, "inc": -7},
+    "H": {"start": 45, "end": 3, "inc": -7},
+    "I": {"start": 43, "end": 1, "inc": -7},
+    "J": {"start": 35, "end": 41, "inc": 1},
+    "K": {"start": 21, "end": 27, "inc": 1},
+    "L": {"start": 7, "end": 13, "inc": 1},
+}
+DIRECTIONS = {
+    "N": {"coords": (-1, 0), "inc": -7, "opposite": "S","sides":("E","W")},
+    "S": {"coords": (1, 0), "inc": 7, "opposite": "N","sides":("E","W")},
+    "W": {"coords": (0, -1), "inc": -1, "opposite": "E","sides":("N","S")},
+    "E": {"coords": (0, 1), "inc": 1, "opposite": "W","sides":("N","S")},
+    (-1, 0): {"name": "N"},
+    (1, 0): {"name": "S"},
+    (0, -1): {"name": "W"},
+    (0, 1): {"name": "E"},
+}
 
-def requestSubscribeStringGenerator(port,):
+tuileCouloir = {'N':True,'E':False,'S':True,'W':False}
+
+rangeeHaut = [0,1,2,3,4,5,6]
+rangeeBas = [42,43,44,45,46,47,48]
+rangeeGauche = [0,7,14,21,28,35,42]
+rangeeDroite = [6,13,20,27,34,41,48]
+stackedExceptionDico={
+    'N':rangeeHaut,
+    'E':rangeeDroite,
+    'S':rangeeBas,
+    'W':rangeeGauche
+}
+##############################################################################################################
+
+
+####Réseau
+def requestSubscribeStringGenerator(port,):#Génère un string et le json.dimps et eoncdoe pr sub une ia
     global index
     matricule2 = str(22371 + index)
     name = listnames[index]
@@ -35,9 +78,7 @@ def requestSubscribeStringGenerator(port,):
     req = req.encode()
 
     return (req,name)
-
-
-def jsonEncodeAndSend(message,s):
+def jsonEncodeAndSend(message,s):#encode json et envoie msg par un socket
     message = jsonEncode(message)
     send =True
     while send:
@@ -50,25 +91,253 @@ def jsonEncode(message):
     return json.dumps(message).encode()
     
 
-
-def validMoves(status,ianame):
+####Négamax
+def validNewPos(playerPos,board,stacked = None):#return une liste de nouvelles positions valides sur la carte ENTREE: Player position on board and the board
     validPositions = []
-    player0or1 = 0
-    for i in range(2):
-        if status['players'][i] == ianame:
-            player0or1 = i
-    playerPos = status['positions'][player0or1]
-    if playerPos>6 and status['board'][playerPos]['N']:
-        validPositions.append(playerPos-7)
-    if playerPos<42 and status['board'][playerPos]['S']:
-        validPositions.append(playerPos+7)
-    if (playerPos%7)!=0 and status['board'][playerPos]['W']:
-        validPositions.append(playerPos-1)
-    if ((playerPos+1)%7)!=0 and status['board'][playerPos]['E']:
-        validPositions.append(playerPos+1)
+    #J'ai commencé a réécrire cette fonction car il y a de la place pour l'optimisation
+    """
+    if playerPos>6 and board[playerPos]['N']:
+        newPos = playerPos-7
+        if (newPos)in range(49):
+            if board[newPos]['S']:
+                validPositions.append(newPos)
+    if playerPos<42 and board[playerPos]['S']:
+        newPos = playerPos +7
+        if (newPos)in range(49):
+            if board[newPos]['N']:
+                validPositions.append(newPos)
+    if (playerPos%7)!=0 and board[playerPos]['W']:
+        newPos = playerPos -1
+        if (newPos)in range(49):
+            if board[newPos]['E']:
+                validPositions.append(newPos)
+    if ((playerPos+1)%7)!=0 and board[playerPos]['E']:
+        newPos = playerPos +1
+        if (newPos)in range(49):
+            if board[newPos]['W']:
+                validPositions.append(newPos)
+    """
+    if stacked != None:
+        newTile = stacked
+    else:
+        newTile = stackedTile(playerPos,board)
+    for cardinal in tuileCouloir:
+        if newTile[cardinal]:
+            newPos = playerPos + DIRECTIONS[cardinal]['inc']
+            #encore une ancienne version mais maintenant une partie du travail est prémachée par stacked
+            """
+            if cardinal == 'W' and (playerPos%7)!=0 and newPos in range(49):
+                validPositions.append(newPos)
+            elif cardinal == 'E' and ((newPos)%7)!=0 and newPos in range(49):
+                validPositions.append(newPos)
+            else:
+                if newPos in range(49):
+                    validPositions.append(newPos)
+            """
+            if newPos in range(49):
+                validPositions.append(newPos)
     validPositions.append(playerPos)
     return validPositions
+def treasurePos(status):#return la position du trésor recherché
+    for i in range(49):
+        if status['board'][i]['item'] == status['target']:
+            return int(i)     
+def returnPos(status):
+    return status['positions'][status['current']]
+def availableMoves(state):#return les moves possibles pour apres aller itérer dedans
+    moves = []
+    temp = []
+    shorTile = {}
+    for cardinale in tuileCouloir:#ici j'utilise tuile couloir parceque je veux juste iterer les cardinaux mais on peut faire "plus simple"(je trouve que ca change rien)
+        temp.append(state['tile'][cardinale])
+        shorTile[cardinale] = state['tile'][cardinale]
+    if all(temp) or not any(temp):
+        for gate in GATES:
+            if GATES[gate]['end'] not in state['positions']:
+                move ={
+                "tile": state['tile'],
+                "gate": gate
+                }
+                tempState = update(state,move)
+                newPos = validNewPos(returnPos(tempState),tempState['board'])
+                for i in newPos:
+                    move['new_position'] = i
+                    move['state'] = tempState
+                    moves.append(move)
+    elif isSameTile(shorTile,tuileCouloir) or isSameTile(shorTile,tuileCouloir):
+        for i in range(2):
+            state['tile'] = turn_tile(turn_tile(state['tile']))
+            for gate in GATES:
+                if GATES[gate]['end'] not in state['positions']:
+                    move ={
+                    "tile": state['tile'],
+                    "gate": gate
+                    }
+                    tempState = update(state,move)
+                    newPos = validNewPos(returnPos(tempState),tempState['board'])
+                    for i in newPos:
+                        move['new_position'] = i
+                        move['state'] = tempState
+                        moves.append(move)
+    else:
+        for cardinal in tuileCouloir:
+            state['tile'] = turn_tile(state['tile'])
+            for gate in GATES:
+                if GATES[gate]['end'] not in state['positions']:
+                    move ={
+                    'tile' : state['tile'],
+                    'gate' : gate
+                    }
+                    tempState = update(state,move)
+                    newPos = validNewPos(returnPos(tempState),tempState['board'])
+                    for i in newPos:
+                        move['new_position'] = i
+                        move['state'] = tempState
+                        moves.append(move)    
+    return moves
+def evalState(state,player):#return le poids de la situation
+    debut = returnPos(state)
+    g = transformPath(state['board'],debut)
+    dijkstra(g, g.get_vertex(debut))
+    end = g.get_vertex(treasurePos(state))
+    if end != None:
+        path = [end.get_id()]
+        shortest(end, path)
+        if type(path) != None:
+            printShortestPath(path)
+            printGraph(g)
+            return player*len(path)
+        else:
+            if player == 1:return float('inf')
+            else : return -1000
+    else:
+        if player == 1:return float('inf')
+        else : return -1000
+def update(state,move):
+    a,b = slideTiles(state['board'],move['tile'],move['gate'])
+    state['board'] = a
+    state['tile'] = b
+    new_positions = []
+    for position in state["positions"]:
+        if onTrack(position, move['gate']):
+            if position == GATES[move['gate']]["end"]:
+                new_positions.append(GATES[move['gate']]["start"])
+                continue
+            new_positions.append(position + GATES[move['gate']]["inc"])
+            continue
+        new_positions.append(position)
+    state["positions"] = new_positions
+    return state
+def transformPath(board,debut):
+    def recursiveLinks(pos,board,longueur,dir):
+        stacked = stackedTile(pos,board)
+        if not stacked[dir]:
+            return (pos,longueur,DIRECTIONS[dir]['opposite'])
+        else:
+            if not(stacked[DIRECTIONS[dir]['sides'][0]] and stacked[DIRECTIONS[dir]['sides'][1]]):
+                newPos = pos +DIRECTIONS[dir]['inc']
+                if newPos in validNewPos(pos,board,stacked):
+                    return recursiveLinks(newPos,board,longueur+1,dir)
+                else:
+                    return (pos,longueur,DIRECTIONS[dir]['opposite'])
+            else:
+                return (pos,longueur,DIRECTIONS[dir]['opposite'])
+    def nodes(pos,board,exception=None):
+        stacked = stackedTile(pos,board)
+        validNewPositions = validNewPos(pos,board,stacked)
+        for card in tuileCouloir:
+            if card == exception:
+                continue
+            if stacked[card]:
+                newPos = pos +DIRECTIONS[card]['inc']
+                if newPos in validNewPositions:
+                    a,b,c = recursiveLinks(newPos,board,1,card)
+                    if a not in g.vert_dict:
+                        g.add_vertex(a)
+                        g.add_edge(pos,a,b)
+                        nodes(a,board,c)
+                    else:
+                        g.add_edge(pos,a,b)
+    g = Graph()
+    g.add_vertex(debut)
+    nodes(debut,board)
+    return g
+def negamax(state, depth, player):
+    if depth == 0:
+        return evalState(state,player)
+    best_value = float('-inf')
+    for move in availableMoves(state):
+        newState = move['state']
+        value = -negamax(newState, depth - 1, -player)
+        best_value = max(best_value, value)
+    return best_value
+def stackedTile(pos,board):
+    newTile = {}
+    for cardinal in tuileCouloir:
+        if pos in stackedExceptionDico[cardinal]:
+            newTile[cardinal] = False
+        else:
+            tilePos = pos+DIRECTIONS[cardinal]['inc']
+            liste = [board[pos][cardinal]]
+            if tilePos in range(49):
+                liste.append(board[tilePos][DIRECTIONS[cardinal]['opposite']])
+            newTile[cardinal] = all(liste)
+    return newTile
+def printGraph(graph):
+    print('Graph data:')
+    for v in graph:
+        for w in v.get_connections():
+            vid = v.get_id()
+            wid = w.get_id()
+            print( '( %s , %s, %3d)'  % ( vid, wid, v.get_weight(w)))
+def printShortestPath(path):
+    print ('The shortest path : %s' %(path[::-1]))
+#ANCIENNE VERSION(plus utilisée car classe dans Dijkstra meilleure et plus opti)
+"""
+def transformPath(status):#Transforme notre labyrinthe en quelque chose de baucoup plus facile a manipuler
+    class Nodes:
+        def __init__(self,pos,board):
+            self.pos = pos
+            self.connection = {}
+            for i in passages(pos,board):
+                longTemp = 1
+                (a,b) = recurcif(self.pos,board,i,longTemp)
+                self.connection[a] = b
+        def returnConnections(self):
+            return self.connection
+        def returnPosition(self):
+            return self.pos
+    def passages(pos,board):
+        passages = []
+        for i in cardinaux:
+            if board[pos][i]:
+                passages.append(i)
+        return passages
+    def isInMap(pos):
+        for i in newMap:
+            if i.pos == pos:
+                return True
+        return False
+    def recurcif(pos,board,direction,longTemp):
+        newpos = pos+cardinaux[direction]
+        if len(passages(newpos,board)) == 2 and board[newpos][direction]:
+            longTemp = longTemp + 1
+            recurcif(newpos,board,direction,longTemp)
+        elif isInMap(newpos):
+            return(newpos,longTemp)
+        #elif 
+        else:
+            newMap.append(Nodes(newpos,board))
+            return (newpos,longTemp)
+    newMap = []
+    cardinaux = {'N':-7,'E':1,'S':7,'W':-1}
+    start, end, board = returnPos(status),treasurePos(status),status['board']
+    newMap.append(Nodes(start,board))
+    return newMap
+"""
 
+
+#########################################UTILS POUR RDCF
 
 def findtreasure(plateau):
     def rdfs(i, j, chemin, visites):   #Méthode qui est utilisé Recursive Depth-first search    
@@ -91,6 +360,15 @@ def findtreasure(plateau):
             if plateau[i][j].statue == "start":
                 rdfs(i, j, [], visites)
     return positions_tresors
+
+def index2coords(index):
+    return index // 7, index % 7
+def coords2index(i, j):
+    return i * 7 + j
+def isCoordsValid(i, j):
+    return i >= 0 and i < 7 and j >= 0 and i < 7
+def add(A, B):
+    return tuple(a + b for a, b in zip(A, B))
 
 
 
@@ -154,6 +432,32 @@ def showState(state):
     for i, pos in enumerate(state["positions"]):
         print(" - {}: {}".format(state["players"][i], pos))
     showBoard(state["board"])
+def slideTiles(board, free, gate):
+    start = GATES[gate]["start"]
+    end = GATES[gate]["end"]
+    inc = GATES[gate]["inc"]
+    new_free = board[end]
+    new_board = copy.deepcopy(board)
+    dest = end
+    src = end - inc
+    while dest != start:
+        new_board[dest] = new_board[src]
+        dest = src
+        src -= inc
+    new_board[start] = free
+    return new_board, new_free
+def onTrack(index, gate):
+    return index in range(
+        GATES[gate]["start"],
+        GATES[gate]["end"] + GATES[gate]["inc"],
+        GATES[gate]["inc"],
+    )
+
+
+
+
+
+
 
 
 
