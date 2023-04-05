@@ -3,12 +3,16 @@ import random
 from utils import *
 import time
 
-#### ---FAIT---    ######CREER CLASSE QUI VA CREER DES OBJETS IA, CHAQUE OBJET IA A UN ATRIBUT Active LES OBJETS SAPPELLLENT IA ET SONT RANGES DANS UNE LISTE
-#aussi un attribut socket qui est son socket
-#chaque objet ia possede uun attribut modèle qui pinte vers la fonction a utiliser pour calculer le next move
-#ecdrire le premier modèle
-#### ---A FAIRE--- ######
-#-modele d'ia
+# ### ---FAIT---    ######CREER CLASSE QUI VA CREER DES OBJETS IA, CHAQUE OBJET IA A UN ATRIBUT Active LES OBJETS SAPPELLLENT IA ET SONT RANGES DANS UNE LISTE
+# aussi un attribut socket qui est son socket
+# chaque objet ia possede uun attribut modèle qui pinte vers la fonction a utiliser pour calculer le next move
+# ecdrire le premier modèle
+# negamax qui marche
+# ### ---A FAIRE--- ######
+# -OPTI
+# Il faut réparer bug: tile is not the right one. Problem is item is nNone..
+# il faut changer nos fonctions déval pr aller plus vite
+
 
 GATES = {
     "A": {"start": 1, "end": 43, "inc": 7},
