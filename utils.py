@@ -384,15 +384,6 @@ def findtreasure(plateau):
                 rdfs(i, j, [], visites)
     return positions_tresors
 
-def index2coords(index):
-    return index // 7, index % 7
-def coords2index(i, j):
-    return i * 7 + j
-def isCoordsValid(i, j):
-    return i >= 0 and i < 7 and j >= 0 and i < 7
-def add(A, B):
-    return tuple(a + b for a, b in zip(A, B))
-
 
 
 ##############################################          ALL CREDITS TO LURK1        ######################################################
@@ -475,6 +466,17 @@ def onTrack(index, gate):
         GATES[gate]["end"] + GATES[gate]["inc"],
         GATES[gate]["inc"],
     )
+
+def index2coords(index):
+    return index // 7, index % 7
+def coords2index(i, j):
+    return i * 7 + j
+def isCoordsValid(i, j):
+    return i >= 0 and i < 7 and j >= 0 and i < 7
+def add(A, B):
+    return tuple(a + b for a, b in zip(A, B))
+
+
 
 
 
