@@ -153,7 +153,7 @@ def treasurePos(status):#return la position du trésor recherché
     for i in range(49):
         if status['board'][i]['item'] == status['target']:
             return int(i)
-        return(90)   
+    return(90)   
 def returnPos(status):
     return status['positions'][status['current']]
 def returnEnemyPos(status):
