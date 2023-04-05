@@ -176,7 +176,9 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
                 for i in newPos:
                     move['new_position'] = i
                     move['state'] = tempState
-                    moves.append(move)
+                    res = copy.deepcopy(move)
+                    moves.append(res)
+                return moves
     for cardinale in tuileCouloir:#ici j'utilise tuile couloir parceque je veux juste iterer les cardinaux mais on peut faire "plus simple"(je trouve que ca change rien)
         temp.append(state['tile'][cardinale])
         shorTile[cardinale] = state['tile'][cardinale]
@@ -190,7 +192,6 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
         for cardinal in tuileCouloir:
             state['tile'] = turn_tile(state['tile'])
             iterGates(state,newPos)
-    return moves
 def evalState(state,player):#return le poids de la situation
     #ANCIENNE VERSION DU CALCUL DE POIDS MAINTENANT OBSCELETTE
     """
@@ -285,7 +286,7 @@ def negamax(state, depth, player):
     best_value = float('-inf')
     for move in availableMoves(state):
         newState = move['state']
-        value = -negamax(newState, depth - 1, -player)
+        value = negamax(newState, depth - 1, -player)
         best_value = max(best_value, value)
     return best_value
 def stackedTile(pos,board):
