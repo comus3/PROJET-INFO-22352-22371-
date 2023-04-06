@@ -103,8 +103,9 @@ def whichGates(positions):
             if gate not in outPut:
                 outPut.append(gate)
     return outPut
-def validNewPos(playerPos,board,stacked = None):#return une liste de nouvelles positions valides sur la carte ENTREE: Player position on board and the board
+def validNewPos(playerPos,board,newTile = None):#return une liste de nouvelles positions valides sur la carte ENTREE: Player position on board and the board
     validPositions = []
+
     #J'ai commencé a réécrire cette fonction car il y a de la place pour l'optimisation
     """
     if playerPos>6 and board[playerPos]['N']:
@@ -128,13 +129,13 @@ def validNewPos(playerPos,board,stacked = None):#return une liste de nouvelles p
             if board[newPos]['W']:
                 validPositions.append(newPos)
     """
-    if stacked != None:
-        newTile = stacked
-    else:
+
+
+    if newTile == None:
         newTile = stackedTile(playerPos,board)
     for cardinal in tuileCouloir:
-        if newTile[cardinal]:
-            newPos = playerPos + DIRECTIONS[cardinal]['inc']
+        if newTile[cardinal] and newTile not in stackedExceptionDico[cardinal]:#version final(optimisée par Côme)
+            validPositions.append(playerPos + DIRECTIONS[cardinal]['inc'])
             #encore une ancienne version mais maintenant une partie du travail est prémachée par stacked
             """
             if cardinal == 'W' and (playerPos%7)!=0 and newPos in range(49):
@@ -145,13 +146,19 @@ def validNewPos(playerPos,board,stacked = None):#return une liste de nouvelles p
                 if newPos in range(49):
                     validPositions.append(newPos)
             """
+            #version Côme avec stacked
+        """
+        if newTile[cardinal]
+            newPos = playerPos + DIRECTIONS[cardinal]['inc']
             if newPos in range(49):
                 validPositions.append(newPos)
+        """
     validPositions.append(playerPos)
     return validPositions
 def treasurePos(status):#return la position du trésor recherché
+    target = status['target']
     for i in range(49):
-        if status['board'][i]['item'] == status['target']:
+        if status['board'][i]['item'] == target:
             return int(i)
     return(90)   
 def returnPos(status):
@@ -257,7 +264,7 @@ def transformPath(board,debut):
             return (pos,longueur,DIRECTIONS[dir]['opposite'])
         else:
             if not(stacked[DIRECTIONS[dir]['sides'][0]] and stacked[DIRECTIONS[dir]['sides'][1]]):
-                newPos = pos +DIRECTIONS[dir]['inc']
+                newPos = pos +DIRECTIONS[dir]['inc']##############/!\   MODIF
                 if newPos in validNewPos(pos,board,stacked):
                     return recursiveLinks(newPos,board,longueur+1,dir)
                 else:
@@ -298,12 +305,8 @@ def stackedTile(pos,board):
     for cardinal in tuileCouloir:
         if pos in stackedExceptionDico[cardinal]:
             newTile[cardinal] = False
-        else:
-            tilePos = pos+DIRECTIONS[cardinal]['inc']
-            liste = [board[pos][cardinal]]
-            if tilePos in range(49):
-                liste.append(board[tilePos][DIRECTIONS[cardinal]['opposite']])
-            newTile[cardinal] = all(liste)
+            continue
+        newTile[cardinal] = all([board[pos][cardinal],board[pos+DIRECTIONS[cardinal]['inc']][DIRECTIONS[cardinal]['opposite']]])
     return newTile
 
 
@@ -480,8 +483,6 @@ def isCoordsValid(i, j):
     return i >= 0 and i < 7 and j >= 0 and i < 7
 def add(A, B):
     return tuple(a + b for a, b in zip(A, B))
-
-
 
 
 
