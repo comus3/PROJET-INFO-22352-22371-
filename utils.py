@@ -129,30 +129,20 @@ def validNewPos(playerPos,board,newTile = None):#return une liste de nouvelles p
             if board[newPos]['W']:
                 validPositions.append(newPos)
     """
-
-
+    def recursiveNewPos(exception,playerPos):
+        newTile = stackedTile(playerPos,board)
+        for cardinal in tuileCouloir:
+            if cardinal == exception:
+                continue
+            if newTile[cardinal] and newTile not in stackedExceptionDico[cardinal]:
+                if playerPos not in validPositions:
+                    validPositions.append(playerPos)
+                    recursiveNewPos(cardinal,playerPos+DIRECTIONS[cardinal]['inc'])
     if newTile == None:
         newTile = stackedTile(playerPos,board)
     for cardinal in tuileCouloir:
-        if newTile[cardinal] and newTile not in stackedExceptionDico[cardinal]:#version final(optimisée par Côme)
-            validPositions.append(playerPos + DIRECTIONS[cardinal]['inc'])
-            #encore une ancienne version mais maintenant une partie du travail est prémachée par stacked
-            """
-            if cardinal == 'W' and (playerPos%7)!=0 and newPos in range(49):
-                validPositions.append(newPos)
-            elif cardinal == 'E' and ((newPos)%7)!=0 and newPos in range(49):
-                validPositions.append(newPos)
-            else:
-                if newPos in range(49):
-                    validPositions.append(newPos)
-            """
-            #version Côme avec stacked
-        """
-        if newTile[cardinal]
-            newPos = playerPos + DIRECTIONS[cardinal]['inc']
-            if newPos in range(49):
-                validPositions.append(newPos)
-        """
+        if newTile[cardinal] and newTile not in stackedExceptionDico[cardinal]:
+            recursiveNewPos(cardinal,playerPos+DIRECTIONS[cardinal]['inc'])
     validPositions.append(playerPos)
     return validPositions
 def treasurePos(status):#return la position du trésor recherché
@@ -170,7 +160,6 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
     temp = []
     shorTile = {}
     newPos = validNewPos(returnPos(state),state['board'])
-    changeGate = whichGates(newPos)
     def iterGates(state,newPos):
         for gate in GATES:
             if GATES[gate]['end'] not in state['positions']:
@@ -179,8 +168,7 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
                 "gate": gate
                 }
                 tempState = update(state,move)
-                if gate in changeGate:
-                    newPos = validNewPos(returnPos(tempState),tempState['board'])
+                newPos = validNewPos(returnPos(tempState),tempState['board'])
                 for i in newPos:
                     move['new_position'] = i
                     move['state'] = tempState
@@ -252,7 +240,7 @@ def evalState(state):#return le poids de la situation
     def absoluteDist():
         xa,ya = index2coords(debut)
         xb,yb = index2coords(endPos)
-        return abs(xb-xa+yb-ya)*2
+        return abs(xb-xa+yb-ya)
     #il faut trouver un moyen de représenter soit la distance entre nous et l'objectif si c'est à notre tour soit la portée de l'énemi si c'est son tout
     debut = returnPos(state)
     g = transformPath(state['board'],debut)
@@ -264,14 +252,15 @@ def evalState(state):#return le poids de la situation
         dist = absoluteDist()
         if length>6:
             return max([180-(5*length),600//dist])
-        elif length>1:
-            return max([1000//length,600//dist])
         else:
-            return float('inf')
+            return max([1000//length,600//dist])
     except:
         #si pas de chemin, calculer la distance a vol d'oiseau.. Tjs interessant car on peut se rapprocher ducoups
-        dist = absoluteDist()
-        return 600//dist
+        try:
+            dist = absoluteDist()
+            return 600//dist
+        except:
+            return 0
 def update(state,move):
     newState = copy.deepcopy(state)
     a,b = slideTiles(state['board'],move['tile'],move['gate'])
@@ -325,15 +314,16 @@ def transformPath(board,debut):
     g.add_vertex(debut)
     nodes(debut,board)
     return g
-def negamax(state, depth):
+def negamax(negaState, depth):
     if depth == 0:
-        return evalState(state)
+        return evalState(negaState)
     worst_value = float('inf')
-    for move1 in availableMoves(state):
+    actual_Value = evalState(negaState)
+    for move1 in availableMoves(negaState):
         newState = move1['state']
         value = negamax(newState, depth - 1)
         worst_value = min(worst_value, value)
-    return worst_value
+    return worst_value + actual_Value
 def stackedTile(pos,board):
     newTile = {}
     for cardinal in tuileCouloir:
