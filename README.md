@@ -1,5 +1,9 @@
 # Labyrinthe AI
+## Auteurs
+Les auteurs de ce projet sont:
 
+ - Plantin-Carrenard Côme  22352
+ - Zekhnini Ayoub  22371
 ## Introduction
 
 Ce projet consiste en la réalisation d'une intelligence artificielle pour le jeu Labyrinthe. L'objectif est de participer à un championnat organisé entre toutes les IA du laboratoire.
@@ -42,12 +46,6 @@ Notre programme utilise l'algorithme negamax pour calculer le prochain mouvement
 
 En cas d'impossibilité de trouver un chemin vers le trésor, que ce soit pour notre programme ou pour son adversaire, notre programme adopte une stratégie différente: Il cherche alors à se rapprocher de son propre trésor dans l'espoir d'augmenter ses chances de victoire. Cette approche permet d'optimiser les chances de gagner, même dans des situations difficiles où trouver le trésor adverse est impossible.
 
-
-## Auteurs
-Les auteurs de ce projet sont:
-
- - Plantin-Carrenard Côme
- - Zekhnini Ayoub
 
 ## Informations supplémentaires
 
