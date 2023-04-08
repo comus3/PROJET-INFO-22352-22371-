@@ -168,7 +168,10 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
                 "gate": gate
                 }
                 tempState = update(state,move)
-                newPos = validNewPos(returnPos(tempState),tempState['board'])
+                for pos in onTrackDict:
+                    if pos in newPos:
+                        newPos = validNewPos(returnPos(tempState),tempState['board'])
+                        break
                 for i in newPos:
                     move['new_position'] = i
                     move['state'] = tempState
@@ -238,29 +241,24 @@ def evalState(state):#return le poids de la situation
     #voir diagramme pour explications completes
 
     def absoluteDist():
-        xa,ya = index2coords(debut)
+        xa,ya = index2coords(returnPos(state))
         xb,yb = index2coords(endPos)
         return abs(xb-xa+yb-ya)
-    #il faut trouver un moyen de représenter soit la distance entre nous et l'objectif si c'est à notre tour soit la portée de l'énemi si c'est son tout
-    debut = returnPos(state)
-    g = transformPath(state['board'],debut)
     endPos = treasurePos(state)
-    try:
-        #si il y a chemin jusque obj, alors là on est contents (:
-        g.get_vertex(endPos)
+    #il faut trouver un moyen de représenter soit la distance entre nous et l'objectif si c'est à notre tour soit la portée de l'énemi si c'est son tout
+    #si il y a chemin jusque obj, alors là on est contents (:
+    if endPos in validNewPos(returnPos(state),state['board']):
         return 500
+    #si pas de chemin, calculer la distance a vol d'oiseau.. Tjs interessant car on peut se rapprocher ducoups
+    try:
+        dist = absoluteDist()
+        gE = transformPath(state['board'],returnEnemyPos)
+        porteeEnemi = 0
+        for i in gE:
+            porteeEnemi = porteeEnemi + i.get_distance()
+        return (450//dist)-(2*porteeEnemi)
     except:
-        #si pas de chemin, calculer la distance a vol d'oiseau.. Tjs interessant car on peut se rapprocher ducoups
-        try:
-            dist = absoluteDist()
-            gE = transformPath(state['board'],returnEnemyPos)
-            porteeEnemi = 0
-            for i in gE:
-                porteeEnemi = porteeEnemi + i.get_distance()
-            endPos = treasurePos(state)
-            return (450//dist)-(2*porteeEnemi)
-        except:
-            return 0
+        return 0
 def update(state,move):
     newState = copy.deepcopy(state)
     a,b = slideTiles(state['board'],move['tile'],move['gate'])
@@ -336,7 +334,7 @@ def stackedTile(pos,board):
 ####         /*\--/*\   NEGAMAX ULTIMATE    \0/_\0/
 
 
-def negamaxUlt(state,depth):
+def negamaxUlt(state,depth=1):#Modifier ici la profondeur, seulement impair!!!
     if depth == 0:
         return evalState(state)
     worst_value = float('inf')

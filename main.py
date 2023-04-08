@@ -1,8 +1,8 @@
-import json
 import random
 from utils import *
 import time
 import threading
+import queue
 
 # ### ---FAIT---    ######CREER CLASSE QUI VA CREER DES OBJETS IA, CHAQUE OBJET IA A UN ATRIBUT Active LES OBJETS SAPPELLLENT IA ET SONT RANGES DANS UNE LISTE
 # aussi un attribut socket qui est son socket
@@ -289,29 +289,30 @@ class NegamaxUltimate:
         self.mode = 'NOTtimed'####      if not necessairy to give outup after 3secs
     def nextMove(self,state,name):
         bestValue = float('-inf')
-        lock = threading.Lock()
+        result_queue = queue.Queue()
+
         threads = []
         inputList = availableMoves(state)
+        # print(str(len(inputList)))
         for move in inputList:
             if move['new_position'] == treasurePos(move['state']):return output(move)
-            moveThread = threading.Thread(target=negamaxUlt,args=(state,self.depth))
+            moveThread = threading.Thread(target=lambda q,arg1:q.put(negamaxUlt(arg1)),args=(result_queue,move['state']))
             threads.append(moveThread)
             moveThread.start()
         if self.mode == "timed":
             start_time = time.monotonic()
-        for i, thread in enumerate(threads):
+        for thread in threads:
             if self.mode == "timed":
                 thread.join(max(0, 3 - (time.monotonic() - start_time)))
             else:
                 thread.join()
-            resultat = thread.result()
-            with lock:
+                resultat = result_queue.get()
                 if resultat>bestValue:
                     bestValue = resultat
-                    bestIndex = i
-                    if bestValue == 1000:
-                        break
-        return output(inputList[bestIndex])
+                    bestMove = inputList[result_queue.qsize()-1]
+                # if bestValue == 1000:
+                #     return output(inputList[result_queue.qsize()-1])
+        return output(bestMove)
                         
 
 ####################### EMULATEURS JEU  ################################
