@@ -13,4 +13,4 @@ def test_IA_valid():
     negamaxx = IA("negamax","negamax")
     nwpi = IA("nwpi","nwpi")
     for ia in listeIA:
-        assert ia.think(stateOfExample)
+        assert ia.think(stateOfExample) 
