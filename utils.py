@@ -9,10 +9,10 @@ from Dijkstra import *
 # Fonction qui calcule le/les chemins vers trésor avec map comme arg
 # fonction random qui prend en param un nombre n(nombre de choix) et rend un chiffre compris entre 0 et n-1
 
-listnames = []
-for i in range(500):
-    listnames.append('IA'+str(i))
-#listnames = ["thomas","top",'nickel','super','ultra','bazarDuGrenier','leLApib','Bat','LEPHOENIX','equateur','tongo','tango','charlie','hebdo','lemecaudessusdemoiestnul','hexadecimal']
+# listnames = []
+# for i in range(500):
+#     listnames.append('IA'+str(i))
+listnames = ["thomas","top",'nickel','super','ultra','bazarDuGrenier','leLApib','Bat','LEPHOENIX','equateur','tongo','tango','charlie','hebdo','lemecaudessusdemoiestnul','hexadecimal']
 index = 0
 
 onTrackDict = {0: ['A', 'I', 'L', 'D'], 1: ['A', 'I', 'D', 'L'], 2: ['A', 'I', 'B', 'H', 'D', 'L'], 3: ['B', 'H', 'D', 'L'], 4: ['B', 'H', 'C', 'G', 'D', 'L'], 5: ['C', 'G', 'D', 'L'], 6: ['C', 'G', 'D', 'L'], 7: ['L', 'D', 'A', 'I'], 8: ['L', 'D', 'A', 'I'], 9: ['A', 'I', 'B', 'H', 'L', 'D'], 10: ['B', 'H', 'L', 'D'], 11: ['B', 'H', 'C', 'G', 'L', 'D'], 12: ['C', 'G', 'L', 
@@ -200,7 +200,7 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
             state['tile'] = turn_tile(state['tile'])
             iterGates(state,newPos)
     return moves
-def evalState(state,player):#return le poids de la situation
+def evalState(state):#return le poids de la situation
     #ANCIENNE VERSION DU CALCUL DE POIDS MAINTENANT OBSCELETTE
     """
     debut = returnPos(state)
@@ -221,6 +221,8 @@ def evalState(state,player):#return le poids de la situation
         if player == 1:return 1000
         else : return 100
     """
+    #encore une ancienne Version mais qui n'est pas vraiment fiable
+    """
     #création du premier graphe
     debutA = returnPos(state)
     gA = transformPath(state['board'],debutA)
@@ -233,7 +235,7 @@ def evalState(state,player):#return le poids de la situation
         xa,ya = index2coords(debutA)
         xb,yb = index2coords(endPos)
         weight = abs(xb-xa+yb-ya)*2
-    """ici, nous pouvons print le graphe obtenu ainsi que calculer le path le plus court vers end avec la methode path(prendre exemple sur l'ancienne version ci dessus)."""
+    #ici, nous pouvons print le graphe obtenu ainsi que calculer le path le plus court vers end avec la methode path(prendre exemple sur l'ancienne version ci dessus).
     #création du deuxième graphe
     debutB = returnEnemyPos(state)
     gB = transformPath(state['board'],debutB)
@@ -242,6 +244,21 @@ def evalState(state,player):#return le poids de la situation
     for i in gB:
         porteeEnemi = porteeEnemi + i.get_distance()
     return player*(1000-(porteeEnemi+(3*weight)))*(1000-weight)
+    """
+    #il faut trouver un moyen de représenter soit la distance entre nous et l'objectif si c'est à notre tour soit la portée de l'énemi si c'est son tout
+    debut = returnPos(state)
+    g = transformPath(state['board'],debut)
+    dijkstra(g, g.get_vertex(debut))
+    endPos = treasurePos(state)
+    try:
+        #si il y a chemin jusque obj,rendre distance mais si distance = 0 alors là on est contents (:
+        return g.get_vertex(endPos).get_distance()
+    except:
+        #si pas de chemin, calculer la distance a vol d'oiseau.. Tjs interessant car on peut se rapprocher ducoups
+        xa,ya = index2coords(debut)
+        xb,yb = index2coords(endPos)
+        weight = abs(xb-xa+yb-ya)*2
+        return weight
 def update(state,move):
     a,b = slideTiles(state['board'],move['tile'],move['gate'])
     state['board'] = a
@@ -258,7 +275,7 @@ def update(state,move):
     state["positions"] = new_positions
     return state
 def transformPath(board,debut):
-    def recursiveLinks(pos,board,longueur,dir):
+    def recursiveLinks(pos,board,longueur,dir):#Rajouter que si on est en positions, noeud
         stacked = stackedTile(pos,board)
         if not stacked[dir]:
             return (pos,longueur,DIRECTIONS[dir]['opposite'])
@@ -291,15 +308,15 @@ def transformPath(board,debut):
     g.add_vertex(debut)
     nodes(debut,board)
     return g
-def negamax(state, depth, player):
+def negamax(state, depth):
     if depth == 0:
-        return evalState(state,player)
-    best_value = float('-inf')
-    for move in availableMoves(state):
-        newState = move['state']
-        value = negamax(newState, depth - 1, -player)
-        best_value = max(best_value, value)
-    return best_value
+        return evalState(state)
+    worst_value = float('inf')
+    for move1 in availableMoves(state):
+        newState = move1['state']
+        value = negamax(newState, depth - 1)
+        worst_value = min(worst_value, value)
+    return worst_value
 def stackedTile(pos,board):
     newTile = {}
     for cardinal in tuileCouloir:
@@ -310,7 +327,7 @@ def stackedTile(pos,board):
     return newTile
 
 
-#section print
+####section print
 def printGraph(graph):
     print('Graph data:')
     for v in graph:

@@ -212,7 +212,7 @@ class Negamax:
         bestValue = float('-inf')
         for move in availableMoves(state):
             newState = move['state']
-            value = negamax(newState, self.depth - 1,-self.player)
+            value = negamax(newState, self.depth - 1)
             if value > bestValue:
                 bestValue = value
                 bestMove = move
