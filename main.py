@@ -74,6 +74,9 @@ class IA:
     def think(self,msg):
         self.state = msg
         print("message pour "+self.name)
+        print("status:\n"+str(msg))
+        ##################print("voici le graphe des moves dispo:     " + transformPath(msg))
+        # showState(msg)
         return self.modele.nextMove(self.state,self.name)
 
     def kill(self):
@@ -204,9 +207,8 @@ class Negamax:
     #pour quel move var1-var2 est minimum? --- faire ce move
     def __init__(self,state):
         self.state = state
-        self.depth = 2     # /!\ MODIFIER La PRofondeur ICI /!\
-        self.player = 1
-        self.mode = 'intesive'
+        self.depth = 2     # /!\ MODIFIER La PRofondeur ICI /!\ attention elle doit tjs etre paire sionon le code ne fait plus de sens
+        self.mode = 'intesive'  
     def nextMove(self,state,name):
         bestMove = None
         bestValue = float('-inf')

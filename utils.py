@@ -67,7 +67,7 @@ stackedExceptionDico={
 
 
 ####Réseau
-def requestSubscribeStringGenerator(port,):#Génère un string et le json.dimps et eoncdoe pr sub une ia
+def requestSubscribeStringGenerator(port):#Génère un string et le json.dimps et eoncdoe pr sub une ia
     global index
     matricule2 = str(22371 + index)
     name = listnames[index]
@@ -192,9 +192,10 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
     if all(temp) or not any(temp):
         iterGates(state,newPos)
     elif isSameTile(shorTile,tuileCouloir):
-        for i in range(2):
-            state['tile'] = turn_tile(turn_tile(state['tile']))
-            iterGates(state,newPos)
+        state['tile'] = state['tile']
+        iterGates(state,newPos)
+        state['tile'] = turn_tile(turn_tile(state['tile']))
+        iterGates(state,newPos)
     else:
         for cardinal in tuileCouloir:
             state['tile'] = turn_tile(state['tile'])
@@ -245,26 +246,39 @@ def evalState(state):#return le poids de la situation
         porteeEnemi = porteeEnemi + i.get_distance()
     return player*(1000-(porteeEnemi+(3*weight)))*(1000-weight)
     """
+    #version FINALE(j'espere)
+    #voir diagramme pour explications completes
+
+    def absoluteDist():
+        xa,ya = index2coords(debut)
+        xb,yb = index2coords(endPos)
+        return abs(xb-xa+yb-ya)*2
     #il faut trouver un moyen de représenter soit la distance entre nous et l'objectif si c'est à notre tour soit la portée de l'énemi si c'est son tout
     debut = returnPos(state)
     g = transformPath(state['board'],debut)
     dijkstra(g, g.get_vertex(debut))
     endPos = treasurePos(state)
     try:
-        #si il y a chemin jusque obj,rendre distance mais si distance = 0 alors là on est contents (:
-        return g.get_vertex(endPos).get_distance()
+        #si il y a chemin jusque obj,rendre distance mais si distance = 2 ou 3 alors là on est contents (:
+        length = g.get_vertex(endPos).get_distance()
+        dist = absoluteDist()
+        if length>6:
+            return max([180-(5*length),600//dist])
+        elif length>1:
+            return max([1000//length,600//dist])
+        else:
+            return float('inf')
     except:
         #si pas de chemin, calculer la distance a vol d'oiseau.. Tjs interessant car on peut se rapprocher ducoups
-        xa,ya = index2coords(debut)
-        xb,yb = index2coords(endPos)
-        weight = abs(xb-xa+yb-ya)*2
-        return weight
+        dist = absoluteDist()
+        return 600//dist
 def update(state,move):
+    newState = copy.deepcopy(state)
     a,b = slideTiles(state['board'],move['tile'],move['gate'])
-    state['board'] = a
-    state['tile'] = b
+    newState['board'] = a
+    newState['tile'] = b
     new_positions = []
-    for position in state["positions"]:
+    for position in newState["positions"]:
         if onTrack(position, move['gate']):
             if position == GATES[move['gate']]["end"]:
                 new_positions.append(GATES[move['gate']]["start"])
@@ -272,10 +286,12 @@ def update(state,move):
             new_positions.append(position + GATES[move['gate']]["inc"])
             continue
         new_positions.append(position)
-    state["positions"] = new_positions
-    return state
+    newState["positions"] = new_positions
+    return newState
 def transformPath(board,debut):
-    def recursiveLinks(pos,board,longueur,dir):#Rajouter que si on est en positions, noeud
+    def recursiveLinks(pos,board,longueur,dir):
+        if pos == treasurePos:
+            return (pos,longueur,DIRECTIONS[dir]['opposite'])
         stacked = stackedTile(pos,board)
         if not stacked[dir]:
             return (pos,longueur,DIRECTIONS[dir]['opposite'])
@@ -304,6 +320,7 @@ def transformPath(board,debut):
                         nodes(a,board,c)
                     else:
                         g.add_edge(pos,a,b)
+    treasure = treasurePos
     g = Graph()
     g.add_vertex(debut)
     nodes(debut,board)
