@@ -212,6 +212,9 @@ class Negamax:
         bestValue = float('-inf')
         for move in availableMoves(state):
             newState = move['state']
+            if move['new_position'] == treasurePos(move['state']):
+                bestMove = move
+                break
             value = negamax(newState, self.depth - 1)
             if value > bestValue:
                 bestValue = value
