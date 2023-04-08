@@ -2,6 +2,7 @@ import json
 import random
 from utils import *
 import time
+import threading
 
 # ### ---FAIT---    ######CREER CLASSE QUI VA CREER DES OBJETS IA, CHAQUE OBJET IA A UN ATRIBUT Active LES OBJETS SAPPELLLENT IA ET SONT RANGES DANS UNE LISTE
 # aussi un attribut socket qui est son socket
@@ -64,6 +65,8 @@ class IA:
             self.modele = Negamax([])
         elif modele == "nwpi":
             self.modele = Nwpi([])
+        elif modele == "negamaxUlt":
+            self.modele = NegamaxUltimate([])
         else:
             self.modele = Random([])
         listeIA.append(self)
@@ -74,7 +77,7 @@ class IA:
     def think(self,msg):
         self.state = msg
         print("message pour "+self.name)
-        print("status:\n"+str(msg))
+        # print("status:\n"+str(msg))
         ##################print("voici le graphe des moves dispo:     " + transformPath(msg))
         # showState(msg)
         return self.modele.nextMove(self.state,self.name)
@@ -278,6 +281,38 @@ class Nwpi:
         self.cache[tuple(state)] = res[0]
         return res
 
+
+class NegamaxUltimate:
+    def __init__(self,state):
+        self.state = state
+        self.depth = 2
+        self.mode = 'NOTtimed'####      if not necessairy to give outup after 3secs
+    def nextMove(self,state,name):
+        bestValue = float('-inf')
+        lock = threading.Lock()
+        threads = []
+        inputList = availableMoves(state)
+        for move in inputList:
+            if move['new_position'] == treasurePos(move['state']):return output(move)
+            moveThread = threading.Thread(target=negamaxUlt,args=(state,self.depth))
+            threads.append(moveThread)
+            moveThread.start()
+        if self.mode == "timed":
+            start_time = time.monotonic()
+        for i, thread in enumerate(threads):
+            if self.mode == "timed":
+                thread.join(max(0, 3 - (time.monotonic() - start_time)))
+            else:
+                thread.join()
+            resultat = thread.result()
+            with lock:
+                if resultat>bestValue:
+                    bestValue = resultat
+                    bestIndex = i
+                    if bestValue == 1000:
+                        break
+        return output(inputList[bestIndex])
+                        
 
 ####################### EMULATEURS JEU  ################################
 
