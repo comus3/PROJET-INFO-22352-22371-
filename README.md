@@ -46,8 +46,8 @@ En cas d'impossibilité de trouver un chemin vers le trésor, que ce soit pour n
 ## Auteurs
 Les auteurs de ce projet sont:
 
- - Côme Plantin-Carrenard
- - Ayoub Zekhnini
+ - Plantin-Carrenard Côme
+ - Zekhnini Ayoub
 
 ## Informations supplémentaires
 
