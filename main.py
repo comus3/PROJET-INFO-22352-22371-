@@ -281,6 +281,16 @@ class Nwpi:
         self.cache[tuple(state)] = res[0]
         return res
 
+#A FAIRE
+# alpha encadrement . des qu'un thread se rend compte que ses valeurs sont en dessous de la best val il se stoppe
+# vu quon cherche le min parmis les moves possibles apres move enemi et pusi on reprend le max parmis cest mins
+#si une valeur d'éval est en dessous du min de ce qu'a return un des threads il se coupe instant pour écvonomiser de la 
+# place
+
+# ne pas call tous les threads en u,ne fois, call les threads suivants des que un thread est fermé un nouveau est ouvert mais 
+# attention un thread n'est pas fermé seulement lorsque il return mais aussi lorsque il se rend compte que ca sert a rien de 
+# continuer
+
 
 class NegamaxUltimate:
     def __init__(self,state):
