@@ -40,10 +40,12 @@ Les commandes disponibles sont:
 
 ## Spécifications techniques
 
-L'IA a été développée en Python 3.
-Notre programme utilise l'algorithme negamax pour calculer le prochain mouvement à effectuer. Pour ce faire, il crée un graphe à partir de l'état en entrée et utilise l'algorithme de Dijkstra pour trouver le chemin le plus court entre la position actuelle et le trésor. Cette méthode permet de calculer efficacement le poids de chaque mouvement possible et ainsi déterminer le prochain mouvement optimal.
+Notre système d'IA a été implémenté en utilisant le langage de programmation Python 3.0. 
+Nous avons adopté l'algorithme Negamax, une variante de l'algorithme Minimax, pour déterminer le prochain mouvement optimal.
+Pour ce faire, il crée un graphe à partir de l'état en entrée et utilise l'algorithme de Dijkstra pour trouver le chemin le plus court entre la position actuelle et le trésor. 
+Cette méthode permet de déterminer de façon efficace le poids de chaque mouvement potentiel, garantissant une décision optimale pour le prochain coup à jouer.
 
-En cas d'impossibilité de trouver un chemin vers le trésor, que ce soit pour notre programme ou pour son adversaire, notre programme adopte une stratégie différente: Il cherche alors à se rapprocher de son propre trésor dans l'espoir d'augmenter ses chances de victoire. Cette approche permet d'optimiser les chances de gagner, même dans des situations difficiles où trouver le trésor adverse est impossible.
+Dans les cas où l'algorithme ne parvient pas à trouver un chemin menant au trésor, que ce soit pour notre programme ou pour son adversaire, notre programme adopte une stratégie différente. Il cherche alors à se rapprocher de son propre trésor dans l'espoir d'augmenter ses chances de victoire. Cette approche permet d'optimiser les chances de gagner, même dans des situations difficiles où la découverte du trésor adverse semble improbable..
 
 ## Bibliothèques Utilisées
 
