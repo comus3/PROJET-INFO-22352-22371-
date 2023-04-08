@@ -138,7 +138,7 @@ def dijkstra(aGraph, start):
 ####### jai juste rajouté le id du vertex au tuple vu qu'ils sont tous différents donc quand poids identiques
 ####### il va comparer id et va le trier dans cet ordre
 #######
-#######
-#######
+#######INFO: dijkstra ne sert plus a rien mtn que je me rends compte de ma betise immense. on eput se deplacer de plus dune case
+#######      a la fois donc chercher le chemin le plus court na plus aucun interet pour linstant
 #######
 #######
