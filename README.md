@@ -46,9 +46,9 @@ Notre programme utilise l'algorithme negamax pour calculer le prochain mouvement
 En cas d'impossibilité de trouver un chemin vers le trésor, que ce soit pour notre programme ou pour son adversaire, notre programme adopte une stratégie différente: Il cherche alors à se rapprocher de son propre trésor dans l'espoir d'augmenter ses chances de victoire. Cette approche permet d'optimiser les chances de gagner, même dans des situations difficiles où trouver le trésor adverse est impossible.
 
 ## Bibliothèques Utilisées
+
 Nous avons utilisé plusieurs bibliothèques pour développer notre IA, notamment :
--
--
+
 
 ## Conclusion
 En conclusion, ce projet a été une opportunité pour nous de développer une intelligence artificielle efficace pour le jeu du Labyrinthe. Nous avons utilisé les meilleures pratiques de programmation ainsi que les bibliothèques les plus avancées pour créer une IA qui est capable de recevoir les informations sur l'état du plateau de jeu, d'analyser ces informations, de calculer la prochaine action à effectuer et enfin d'envoyer cette action à l'application gérant les parties.
