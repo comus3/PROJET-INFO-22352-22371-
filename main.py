@@ -330,6 +330,7 @@ class MPST:
         self.mode = 'chillax-UN-MAXXXXX'
         self.bestValue = 0
         self.bestMove = None
+        self.running = True
     def nextMove(self,state,name):
         class Tree:
             def __init__(self,value):
@@ -377,7 +378,7 @@ class MPST:
                         returnList.append(Tree(gate))
                 return returnList
             possibilityTree = []
-            running = True
+            self.running = True
             
             for move in init:
                 state = move['state']
@@ -403,10 +404,10 @@ class MPST:
                         smollPossibilityTree[len(smollPossibilityTree)-1].addKids(iterGates(state))
                 possibilityTree.append(smollPossibilityTree)
 
-            while running:
+            while self.running:
                 bestMoveIndex = 0
                 if possibilityTree == []:
-                    running = False
+                    self.running = False
                 for move in possibilityTree:
                     if move == []:
                         possibilityTree.pop(bestMoveIndex)
@@ -437,7 +438,7 @@ class MPST:
                             if self.bestValue < 500:
                                 self.bestValue = 500
                                 self.bestMove = init[bestMoveIndex]
-                                running = False
+                                self.running = False
                             lock.release()
                             move[tile].popKid(gate)
                             continue
@@ -455,7 +456,7 @@ class MPST:
         lock = threading.Lock()
         recherche = treasurePos(state)
         evalThreads = []
-        start_time = time.monotonic()
+        start_time = time.time()
         self.bestValue = float('-inf')
         self.bestMove = None
         moveList = availableMoves(state)
@@ -471,14 +472,19 @@ class MPST:
             evalThreads.append(evalThread)
         for thread in evalThreads:
             thread.start()
+        elapsedTime = time.time()-start_time
+        while elapsedTime<2.95:
+            elapsedTime = time.time()-start_time
         for thread in evalThreads:
-            # thread.join()
-            thread.join(max(0, 3 - (time.monotonic() - start_time)))
+            # thread.join(10)
+            self.running = False
+            #si contre random garder un temps de 1sec pr etrre sur que threads are dead
+            time.sleep(1)
         if self.bestMove == None:
             newModel = Random(state)
             bestMoveRandom = newModel.nextMove(state,name)
             return bestMoveRandom
-        print('processus de calcul terminé en : ' + str(start_time//100) +'\n avec un score de :     '+str(self.bestValue))
+        print('processus de calcul terminé en : ' + str(elapsedTime) +'\n avec un score de :     '+str(self.bestValue))
         return output(self.bestMove)
 
 ####################### EMULATEURS JEU  ################################
