@@ -328,6 +328,8 @@ class MPST:
         self.state = state
         self.cuts = 1
         self.mode = 'chillax-UN-MAXXXXX'
+        self.bestValue = 0
+        self.bestMove = None
     def nextMove(self,state,name):
         class Tree:
             def __init__(self,value):
@@ -344,7 +346,9 @@ class MPST:
                 return self.attachedState
             def popKid(self,index):
                 self.kids.pop(index)
-        def threadBrains(init,bestValue):
+            def returnValue(self):
+                return self.value
+        def threadBrains(init):
             def evalState(state,newPos):
                 recherche = treasurePos(state)
                 distance = 1
@@ -372,10 +376,9 @@ class MPST:
                     if GATES[gate]['end'] not in state['positions']:
                         returnList.append(Tree(gate))
                 return returnList
-            global bestMove
             possibilityTree = []
             running = True
-
+            
             for move in init:
                 state = move['state']
                 temp = []
@@ -417,7 +420,9 @@ class MPST:
                         continue
                     gate = random.randint(0,len(move[tile].returnKids())-1)
                     if move[tile].returnKids()[gate].returnState() == None:
-                        newState = update(move['state'],{'tile':move[tile],'gate':move[tile].returnKids()[gate]})
+                        freeTile = copy.deepcopy(move[tile].returnValue())
+                        gaetan = move[tile].returnKids()[gate].returnValue()
+                        newState = update(init[bestMoveIndex]['state'],{'tile':freeTile,'gate':gaetan})
                         move[tile].returnKids()[gate].addState(newState)
                     elif move[tile].returnKids()[gate].returnKids() == []:
                         #pop ici les trucs de gate
@@ -428,58 +433,53 @@ class MPST:
                         move[tile].returnKids()[gate].addKids(validNewPos(returnPos(move[tile].returnKids()[gate].returnState()),move[tile].returnKids()[gate].returnState()['board']))
                         recherche = treasurePos(move[tile].returnKids()[gate].returnState())
                         if recherche in move[tile].returnKids()[gate].returnKids():
-                            if bestMove.value < 500:
-                                bestValue.value = 500
-                                with lock:
-                                    bestMove = init[bestMoveIndex]
+                            lock.acquire()
+                            if self.bestValue < 500:
+                                self.bestValue = 500
+                                self.bestMove = init[bestMoveIndex]
+                                running = False
+                            lock.release()
                             move[tile].popKid(gate)
                             continue
                     finalState = move[tile].returnKids()[gate].returnState()
                     evaluated = (evalState(finalState,move[tile].returnKids()[gate].returnKids()),bestMoveIndex)#tester ici le move gate et pop gate
                     move[tile].popKid(gate)
-                    if evaluated[0]>bestValue.value:
-                        bestValue.value = evaluated[0]
-                        with lock:
-                            bestMove = init[bestMoveIndex]
+                    lock.acquire()
+                    if evaluated[0]>self.bestValue:
+                        self.bestValue = evaluated[0]
+                        self.bestMove = init[bestMoveIndex]
+                    lock.release()
                     bestMoveIndex = bestMoveIndex + 1
-
-            for i in range(len(init)-1):
-                evaluated = random.random.randint(0, len(init.kids))
-                output = (evalState(init.kids[evaluated]),init.move)
-                if output[0]>bestValue.value:
-                    bestValue.value = output[0]
-                    with lock:
-                        bestMove = output[1]
-                init.kids.pop(evaluated)
 
         
         lock = threading.Lock()
         recherche = treasurePos(state)
         evalThreads = []
-        # start_time = time.monotonic()
-        bestValue = Manager().Value('d', float('-inf'))
-        bestMove = None
+        start_time = time.monotonic()
+        self.bestValue = float('-inf')
+        self.bestMove = None
         moveList = availableMoves(state)
         for move in moveList:
             if move['new_position'] == recherche:return output(move)
-        inc = len(smollList)//(self.cuts+1)
+        inc = len(moveList)//(self.cuts+1)
         ind = 0
         for cut in range(self.cuts+1):
             next = ind+inc
-            section = smollList[ind:next]
+            section = moveList[ind:next]
             ind = next
-            evalThread = threading.Thread(target=threadBrains,args=(section,bestValue))
+            evalThread = threading.Thread(target=threadBrains,args=(section,))
             evalThreads.append(evalThread)
         for thread in evalThreads:
             thread.start()
         for thread in evalThreads:
-            thread.join()
-            # thread.join(max(0, 3 - (time.monotonic() - start_time)))
-        if bestMove == None:
+            # thread.join()
+            thread.join(max(0, 3 - (time.monotonic() - start_time)))
+        if self.bestMove == None:
             newModel = Random(state)
-            bestMove = newModel.nextMove(state,name)
-            return output(bestMove)
-        return output(bestMove)
+            bestMoveRandom = newModel.nextMove(state,name)
+            return bestMoveRandom
+        print('processus de calcul terminé en : ' + str(start_time//100) +'\n avec un score de :     '+str(self.bestValue))
+        return output(self.bestMove)
 
 ####################### EMULATEURS JEU  ################################
 
