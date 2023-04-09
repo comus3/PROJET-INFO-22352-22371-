@@ -95,7 +95,7 @@ def jsonEncode(message):
     return json.dumps(message).encode()
     
 
-####Négamax
+####Utils de côme
 def whichGates(positions):
     outPut = []
     for pos in positions:
@@ -332,6 +332,7 @@ def stackedTile(pos,board):
     return newTile
 
 ####         /*\--/*\   NEGAMAX ULTIMATE    \0/_\0/
+# cQuestion pr pfro: comment faire pr alpha bracketying ou je sais plus quoi prq deja un locj existaant au debut
 
 
 def negamaxUlt(state,depth=1):#Modifier ici la profondeur, seulement impair!!!
@@ -350,6 +351,7 @@ def output(move):
             "move": move,
             "message": "I'm smart but god damn am I slow"
         }
+
 
 ####section print
 def printGraph(graph):

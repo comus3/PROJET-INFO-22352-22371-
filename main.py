@@ -1,8 +1,10 @@
 import random
 from utils import *
+from multiprocessing import Manager
 import time
 import threading
 import queue
+
 
 # ### ---FAIT---    ######CREER CLASSE QUI VA CREER DES OBJETS IA, CHAQUE OBJET IA A UN ATRIBUT Active LES OBJETS SAPPELLLENT IA ET SONT RANGES DANS UNE LISTE
 # aussi un attribut socket qui est son socket
@@ -43,7 +45,7 @@ nonBouges = [0,2,4,6,14,16,18,20,28,30,32,34,32,34,36,38]
 listeIA = []
 gateList = ["A","B","C","D","E","F","G","H","I","J","K","L"]
 
-
+smollList = []
 
 def returnListeIA():
     return listeIA
@@ -67,6 +69,8 @@ class IA:
             self.modele = Nwpi([])
         elif modele == "negamaxUlt":
             self.modele = NegamaxUltimate([])
+        elif modele == "MPST":
+            self.modele = MPST([])
         else:
             self.modele = Random([])
         listeIA.append(self)
@@ -226,21 +230,15 @@ class Negamax:
                 bestMove = move
         if bestMove == None:
             newModel = Random(state)
-            output = newModel.nextMove(state)
-            return output
+            bestMove = newModel.nextMove(state)
+            return output(bestMove)
         print('best value is :  ' + str(bestValue))
         move ={
             "tile": bestMove['tile'],
             "gate": bestMove['gate'],
             "new_position": bestMove['new_position']
         }
-        output = {
-            "response": "move",
-            "move": move,
-            "message": "I'm smart but god damn am I slow"
-        }
-        print(output)
-        return output
+        return output(move)
 
 
 class Nwpi:
@@ -281,7 +279,9 @@ class Nwpi:
         self.cache[tuple(state)] = res[0]
         return res
 
-#A FAIRE
+
+class NegamaxUltimate:
+    #A FAIRE
 # alpha encadrement . des qu'un thread se rend compte que ses valeurs sont en dessous de la best val il se stoppe
 # vu quon cherche le min parmis les moves possibles apres move enemi et pusi on reprend le max parmis cest mins
 #si une valeur d'éval est en dessous du min de ce qu'a return un des threads il se coupe instant pour écvonomiser de la 
@@ -291,8 +291,7 @@ class Nwpi:
 # attention un thread n'est pas fermé seulement lorsque il return mais aussi lorsque il se rend compte que ca sert a rien de 
 # continuer
 
-
-class NegamaxUltimate:
+# ducps demander au prof prq je vois pas comment faire enft
     def __init__(self,state):
         self.state = state
         self.depth = 2
@@ -324,6 +323,64 @@ class NegamaxUltimate:
                 #     return output(inputList[result_queue.qsize()-1])
         return output(bestMove)
                         
+
+
+class MPST:
+    class Minions:
+        def __init__(self,initMove):
+            self.kids = self.generateKids(initMove['state'])
+            self.move= initMove
+            smollList.append(self)
+        def generateKids(self,state):
+            return availableMoves(state)
+    def __init__(self,state):
+        self.state = state
+        self.cuts = 1
+    def nextMove(self,state,name):
+        def threadBrains(init,bestValue):
+            global bestMove
+            for i in range(len(init.kids)-1):
+                evaluated = random.random.randint(0, len(init.kids))
+                output = (evalState(init.kids[evaluated]),init.move)
+                if output[0]>bestValue.value:
+                    bestValue.value = output[0]
+                    with lock:
+                        bestMove = output[1]
+                init.kids.pop(evaluated)
+        lock = threading.Lock()
+        recherche = treasurePos(state)
+        threadList = []
+        start_time = time.monotonic()
+        bestValue = Manager().Value('d', float('-inf'))
+        bestMove = None
+        for move in availableMoves(state):
+            if move['new_position'] == recherche:return output(move)
+            newMinion = self.Minions(move)
+        #     treeThread = threading.Thread(target=self.Minions,args=(move,))
+        #     threadList.append(treeThread)
+        # for tThread in threadList:
+        #     tThread.start()
+        # for thread in threadList:
+        #     thread.join()
+
+        inc = len(smollList)//(self.cuts+1)
+        ind = 0
+        evalThreads = []
+        for cut in range(self.cuts+1):
+            next = ind+inc
+            section = smollList[ind:next]
+            ind = next
+            evalThread = threading.Thread(target=threadBrains,args=(section,bestValue))
+            evalThreads.append(evalThread)
+        for thread in evalThreads:
+            evalThread.start()
+        for thread in evalThreads:
+            thread.join(max(0, 3 - (time.monotonic() - start_time)))
+        if bestMove == None:
+            newModel = Random(state)
+            bestMove = newModel.nextMove(state)
+            return output(bestMove)
+        return output(bestMove)
 
 ####################### EMULATEURS JEU  ################################
 
