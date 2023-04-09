@@ -11,10 +11,9 @@ import queue
 # chaque objet ia possede uun attribut modèle qui pinte vers la fonction a utiliser pour calculer le next move
 # ecdrire le premier modèle
 # negamax qui marche
+# MPST
 # ### ---A FAIRE--- ######
-# -OPTI
-# Il faut réparer bug: tile is not the right one. Problem is item is nNone..
-# il faut changer nos fonctions déval pr aller plus vite
+# debut
 
 
 GATES = {
@@ -89,7 +88,6 @@ class IA:
     def kill(self):
         self.active = False
         
-
 ####################### MODèLES IA  ################################
 
 class Manuel:
@@ -326,20 +324,126 @@ class NegamaxUltimate:
 
 
 class MPST:
-    class Minions:
-        def __init__(self,initMove):
-            self.kids = self.generateKids(initMove['state'])
-            self.move= initMove
-            smollList.append(self)
-        def generateKids(self,state):
-            return availableMoves(state)
     def __init__(self,state):
         self.state = state
         self.cuts = 1
+        self.mode = 'chillax-UN-MAXXXXX'
     def nextMove(self,state,name):
+        class Tree:
+            def __init__(self,value):
+                self.value = value
+                self.kids = None
+                self.attachedState = None
+            def addKids(self,kids):
+                self.kids = kids
+            def returnKids(self):
+                return self.kids
+            def addState(self,state):
+                self.attachedState = state
+            def returnState(self):
+                return self.attachedState
+            def popKid(self,index):
+                self.kids.pop(index)
         def threadBrains(init,bestValue):
+            def evalState(state,newPos):
+                recherche = treasurePos(state)
+                distance = 1
+                for pos in newPos:
+                    newDist = absoluteDist(pos,recherche)
+                    if newDist<distance:
+                        distance = newDist
+                if recherche not in newPos:
+                    if self.mode=='offencive':
+                        gE = transformPath(state['board'],returnEnemyPos)
+                        porteeEnemi = 0
+                        for i in gE:
+                            porteeEnemi = porteeEnemi + i.get_distance()
+                        return 500-porteeEnemi-10*distance
+                    return 500-distance
+                else:
+                    return 500
+            def absoluteDist(A,B):
+                xa,ya = index2coords(A)
+                xb,yb = index2coords(B)
+                return abs(xb-xa+yb-ya)
+            def iterGates(state):
+                returnList = []
+                for gate in GATES:
+                    if GATES[gate]['end'] not in state['positions']:
+                        returnList.append(Tree(gate))
+                return returnList
             global bestMove
-            for i in range(len(init.kids)-1):
+            possibilityTree = []
+            running = True
+
+            for move in init:
+                state = move['state']
+                temp = []
+                shorTile = {}
+                smollPossibilityTree = []
+                for cardinale in tuileCouloir:#ici j'utilise tuile couloir parceque je veux juste iterer les cardinaux mais on peut faire "plus simple"(je trouve que ca change rien)
+                    temp.append(state['tile'][cardinale])
+                    shorTile[cardinale] = state['tile'][cardinale]
+                if all(temp) or not any(temp):
+                    smollPossibilityTree = [Tree(state['tile'])]
+                    smollPossibilityTree[0].addKids(iterGates(state))
+                elif isSameTile(shorTile,tuileCouloir):
+                    smollPossibilityTree.append(Tree(state['tile']))
+                    smollPossibilityTree[0].addKids(iterGates(state))
+                    state['tile'] = turn_tile(turn_tile(state['tile']))
+                    smollPossibilityTree.append(Tree(state['tile']))
+                    smollPossibilityTree[1].addKids(iterGates(state))
+                else:
+                    for cardinal in tuileCouloir:
+                        state['tile'] = turn_tile(state['tile'])
+                        smollPossibilityTree.append(Tree(state['tile']))
+                        smollPossibilityTree[len(smollPossibilityTree)-1].addKids(iterGates(state))
+                possibilityTree.append(smollPossibilityTree)
+
+            while running:
+                bestMoveIndex = 0
+                if possibilityTree == []:
+                    running = False
+                for move in possibilityTree:
+                    if move == []:
+                        possibilityTree.pop(bestMoveIndex)
+                        bestMoveIndex = bestMoveIndex + 1
+                        continue
+                    tile = random.randint(0,len(move)-1)
+                    if move[tile].returnKids() == []:
+                        #pop ici les trucs de tile
+                        move.pop(tile)
+                        bestMoveIndex = bestMoveIndex + 1
+                        continue
+                    gate = random.randint(0,len(move[tile].returnKids())-1)
+                    if move[tile].returnKids()[gate].returnState() == None:
+                        newState = update(move['state'],{'tile':move[tile],'gate':move[tile].returnKids()[gate]})
+                        move[tile].returnKids()[gate].addState(newState)
+                    elif move[tile].returnKids()[gate].returnKids() == []:
+                        #pop ici les trucs de gate
+                        move[tile].popKid(gate)
+                        bestMoveIndex = bestMoveIndex + 1
+                        continue
+                    if move[tile].returnKids()[gate].returnKids() == None:
+                        move[tile].returnKids()[gate].addKids(validNewPos(returnPos(move[tile].returnKids()[gate].returnState()),move[tile].returnKids()[gate].returnState()['board']))
+                        recherche = treasurePos(move[tile].returnKids()[gate].returnState())
+                        if recherche in move[tile].returnKids()[gate].returnKids():
+                            if bestMove.value < 500:
+                                bestValue.value = 500
+                                with lock:
+                                    bestMove = init[bestMoveIndex]
+                            move[tile].popKid(gate)
+                            continue
+                    finalState = move[tile].returnKids()[gate].returnState()
+                    evaluated = (evalState(finalState,move[tile].returnKids()[gate].returnKids()),bestMoveIndex)#tester ici le move gate et pop gate
+                    move[tile].popKid(gate)
+                    if evaluated[0]>bestValue.value:
+                        bestValue.value = evaluated[0]
+                        with lock:
+                            bestMove = init[bestMoveIndex]
+                    bestMoveIndex = bestMoveIndex + 1
+
+            for i in range(len(init)-1):
                 evaluated = random.random.randint(0, len(init.kids))
                 output = (evalState(init.kids[evaluated]),init.move)
                 if output[0]>bestValue.value:
@@ -347,25 +451,19 @@ class MPST:
                     with lock:
                         bestMove = output[1]
                 init.kids.pop(evaluated)
+
+        
         lock = threading.Lock()
         recherche = treasurePos(state)
-        threadList = []
-        start_time = time.monotonic()
+        evalThreads = []
+        # start_time = time.monotonic()
         bestValue = Manager().Value('d', float('-inf'))
         bestMove = None
-        for move in availableMoves(state):
+        moveList = availableMoves(state)
+        for move in moveList:
             if move['new_position'] == recherche:return output(move)
-            newMinion = self.Minions(move)
-        #     treeThread = threading.Thread(target=self.Minions,args=(move,))
-        #     threadList.append(treeThread)
-        # for tThread in threadList:
-        #     tThread.start()
-        # for thread in threadList:
-        #     thread.join()
-
         inc = len(smollList)//(self.cuts+1)
         ind = 0
-        evalThreads = []
         for cut in range(self.cuts+1):
             next = ind+inc
             section = smollList[ind:next]
@@ -373,12 +471,13 @@ class MPST:
             evalThread = threading.Thread(target=threadBrains,args=(section,bestValue))
             evalThreads.append(evalThread)
         for thread in evalThreads:
-            evalThread.start()
+            thread.start()
         for thread in evalThreads:
-            thread.join(max(0, 3 - (time.monotonic() - start_time)))
+            thread.join()
+            # thread.join(max(0, 3 - (time.monotonic() - start_time)))
         if bestMove == None:
             newModel = Random(state)
-            bestMove = newModel.nextMove(state)
+            bestMove = newModel.nextMove(state,name)
             return output(bestMove)
         return output(bestMove)
 
