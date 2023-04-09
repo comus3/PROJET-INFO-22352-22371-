@@ -168,10 +168,7 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
                 "gate": gate
                 }
                 tempState = update(state,move)
-                for pos in onTrackDict:
-                    if pos in newPos:
-                        newPos = validNewPos(returnPos(tempState),tempState['board'])
-                        break
+                newPos = validNewPos(returnPos(tempState),tempState['board'])
                 for i in newPos:
                     move['new_position'] = i
                     move['state'] = tempState
@@ -183,7 +180,6 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
     if all(temp) or not any(temp):
         iterGates(state,newPos)
     elif isSameTile(shorTile,tuileCouloir):
-        state['tile'] = state['tile']
         iterGates(state,newPos)
         state['tile'] = turn_tile(turn_tile(state['tile']))
         iterGates(state,newPos)
@@ -240,6 +236,8 @@ def evalState(state):#return le poids de la situation
     #version FINALE(j'espere)
     #voir diagramme pour explications completes
 
+    #en fait cette vesion est elle aussi erronée.. Ce qui est triste
+    """
     def absoluteDist():
         xa,ya = index2coords(returnPos(state))
         xb,yb = index2coords(endPos)
@@ -259,6 +257,8 @@ def evalState(state):#return le poids de la situation
         return (450//dist)-(2*porteeEnemi)
     except:
         return 0
+    """
+    return 0
 def update(state,move):
     newState = copy.deepcopy(state)
     a,b = slideTiles(state['board'],move['tile'],move['gate'])
@@ -351,6 +351,8 @@ def output(move):
             "move": move,
             "message": "I'm smart but god damn am I slow"
         }
+
+
 
 
 ####section print
