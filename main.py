@@ -394,14 +394,14 @@ class MPST:# Modèle final.
 
                     if porteeEnemi>30:
                         if recherche in newPos:
-                            return 300-porteeEnemi-distance
+                            return 300-distance
                         else:
-                            return 100-porteeEnemi-distance
+                            return 100-distance
                     else:
                         if recherche in newPos:
-                            return 500-porteeEnemi-distance
+                            return 500-distance
                         else:
-                            return 400-porteeEnemi-distance
+                            return 400-distance
                 if self.mode == 'offencive':
                     return offenciveEval(state,newPos)
                 elif self.mode == 'defencive':
@@ -525,7 +525,7 @@ class MPST:# Modèle final.
             bestMoveRandom = newModel.nextMove(state,name)
             return bestMoveRandom
         if self.lastValue>self.bestValue and self.mode == 'strategic':
-            self.mode = 'offencive'
+            self.mode = 'defencive'
         elif self.bestMove['state']['remaining'][1-self.bestMove['state']['current']]-self.bestMove['state']['remaining'][self.bestMove['state']['current']]>2:
             if self.lastEvalMode == 'offencive':self.mode = 'strategic'
             elif self.lastEvalMode == 'strategic':self.mode == 'offencive'
