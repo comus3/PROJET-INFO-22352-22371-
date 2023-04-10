@@ -141,4 +141,5 @@ def dijkstra(aGraph, start):
 #######INFO: dijkstra ne sert plus a rien mtn que je me rends compte de ma betise immense. on eput se deplacer de plus dune case
 #######      a la fois donc chercher le chemin le plus court na plus aucun interet pour linstant
 #######
-#######
+#######FINAL NOTE: Le fichier dijkstra contient les methodes nécéssaires au calul de la portée de l'énemi
+####### en effet, on calcule le graphe apt de la pos de l'enemi et on fait la somme des distances
