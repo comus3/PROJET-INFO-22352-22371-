@@ -159,6 +159,7 @@ class Random:
             "move": move,
             "message": "I'm random and stupid"
         }
+        time.sleep(1)##############    /!!!!!!\ il faut absolument mettre cette ligne en com pdt le championna sinon on est morts 
         return output
     
 
@@ -323,14 +324,17 @@ class NegamaxUltimate:
                         
 
 
-class MPST:
+class MPST:# Modèle final.
     def __init__(self,state):
         self.state = state
         self.cuts = 1
-        self.mode = 'chillax-UN-MAXXXXX'
+        self.mode = 'strategic'
         self.bestValue = 0
         self.bestMove = None
-        self.running = True
+        self.running = False
+        self.lastMove = None
+        self.lastValue = 0
+        self.lastEvalMode = self.mode
     def nextMove(self,state,name):
         class Tree:
             def __init__(self,value):
@@ -352,25 +356,64 @@ class MPST:
         def threadBrains(init):
             def evalState(state,newPos):
                 recherche = treasurePos(state)
-                distance = 1
-                for pos in newPos:
-                    newDist = absoluteDist(pos,recherche)
-                    if newDist<distance:
-                        distance = newDist
-                if recherche not in newPos:
-                    if self.mode=='offencive':
-                        gE = transformPath(state['board'],returnEnemyPos)
-                        porteeEnemi = 0
-                        for i in gE:
-                            porteeEnemi = porteeEnemi + i.get_distance()
-                        return 500-porteeEnemi-10*distance
-                    return 500-distance
+                def offenciveEval(state,newPos):
+                    distance = 15
+                    for pos in newPos:
+                        newDist = absoluteDist(pos,recherche)
+                        if newDist<distance:
+                            distance = newDist
+                    gE = transformPath(state['board'],returnEnemyPos(state))
+                    porteeEnemi = 0
+                    for i in gE:
+                        porteeEnemi = porteeEnemi + i.get_distance()
+                    return 500-porteeEnemi-distance
+                def defenciveEval(state,newPos):
+                    distance = 15
+                    for pos in newPos:
+                        newDist = absoluteDist(pos,recherche)
+                        if newDist<distance:
+                            distance = newDist
+                    if recherche in newPos:
+                        return 500-newDist
+                    else:
+                        return 400-newDist
+                    return 0
+                def strategicEval(state,newPos):
+                    gE = transformPath(state['board'],returnEnemyPos(state))
+                    porteeEnemi = 0
+                    for i in gE:
+                        porteeEnemi = porteeEnemi + i.get_distance()
+                    distance = 15
+                    for pos in newPos:
+                        newDist = absoluteDist(pos,recherche)
+                        if newDist<distance:
+                            distance = newDist
+
+                    if porteeEnemi>30:
+                        if recherche in newPos:
+                            return 300-porteeEnemi-distance
+                        else:
+                            return 100-porteeEnemi-distance
+                    else:
+                        if recherche in newPos:
+                            return 500-porteeEnemi-distance
+                        else:
+                            return 400-porteeEnemi-distance
+                if self.mode == 'offencive':
+                    return offenciveEval(state,newPos)
+                elif self.mode == 'defencive':
+                    return defenciveEval(state,newPos)
+                elif self.mode == 'strategic':
+                    return strategicEval(state,newPos)
                 else:
-                    return 500
+                    return strategicEval(state,newPos)
             def absoluteDist(A,B):
-                xa,ya = index2coords(A)
-                xb,yb = index2coords(B)
-                return abs(xb-xa+yb-ya)
+                try:
+                    xa,ya = index2coords(A)
+                    xb,yb = index2coords(B)
+                    return abs(xb-xa+yb-ya)
+                except:
+                    return 0
             def iterGates(state):
                 returnList = []
                 for gate in GATES:
@@ -410,7 +453,6 @@ class MPST:
                     self.running = False
                 for move in possibilityTree:
                     if move == []:
-                        possibilityTree.pop(bestMoveIndex)
                         bestMoveIndex = bestMoveIndex + 1
                         continue
                     tile = random.randint(0,len(move)-1)
@@ -421,9 +463,7 @@ class MPST:
                         continue
                     gate = random.randint(0,len(move[tile].returnKids())-1)
                     if move[tile].returnKids()[gate].returnState() == None:
-                        freeTile = copy.deepcopy(move[tile].returnValue())
-                        gaetan = move[tile].returnKids()[gate].returnValue()
-                        newState = update(init[bestMoveIndex]['state'],{'tile':freeTile,'gate':gaetan})
+                        newState = update(init[bestMoveIndex]['state'],{'tile':move[tile].returnValue(),'gate':move[tile].returnKids()[gate].returnValue()})
                         move[tile].returnKids()[gate].addState(newState)
                     elif move[tile].returnKids()[gate].returnKids() == []:
                         #pop ici les trucs de gate
@@ -442,8 +482,7 @@ class MPST:
                             lock.release()
                             move[tile].popKid(gate)
                             continue
-                    finalState = move[tile].returnKids()[gate].returnState()
-                    evaluated = (evalState(finalState,move[tile].returnKids()[gate].returnKids()),bestMoveIndex)#tester ici le move gate et pop gate
+                    evaluated = (evalState(move[tile].returnKids()[gate].returnState(),move[tile].returnKids()[gate].returnKids()),bestMoveIndex)#tester ici le move gate et pop gate
                     move[tile].popKid(gate)
                     lock.acquire()
                     if evaluated[0]>self.bestValue:
@@ -478,12 +517,20 @@ class MPST:
         for thread in evalThreads:
             # thread.join(10)
             self.running = False
-            #si contre random garder un temps de 1sec pr etrre sur que threads are dead
-            time.sleep(1)
         if self.bestMove == None:
             newModel = Random(state)
             bestMoveRandom = newModel.nextMove(state,name)
             return bestMoveRandom
+        if self.lastValue>self.bestValue and self.mode == 'strategic':
+            self.mode = 'offencive'
+        elif self.bestMove['state']['remaining'][1-self.bestMove['state']['current']]-self.bestMove['state']['remaining'][self.bestMove['state']['current']]>2:
+            if self.lastEvalMode == 'offencive':self.mode = 'strategic'
+            elif self.lastEvalMode == 'strategic':self.mode == 'offencive'
+            else:self.mode = 'offencive'
+        else: self.mode = 'strategic'
+        self.lastEvalMode = self.mode
+        self.lastValue = self.bestValue
+        self.lastMove = self.bestMove
         print('processus de calcul terminé en : ' + str(elapsedTime) +'\n avec un score de :     '+str(self.bestValue))
         return output(self.bestMove)
 
