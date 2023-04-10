@@ -526,7 +526,7 @@ class MPST:# Modèle final.
             return bestMoveRandom
         if self.lastValue>self.bestValue and self.mode == 'strategic':
             self.mode = 'defencive'
-        elif self.bestMove['state']['remaining'][1-self.bestMove['state']['current']]-self.bestMove['state']['remaining'][self.bestMove['state']['current']]>2:
+        elif self.bestMove['state']['remaining'][1-self.bestMove['state']['current']]-self.bestMove['state']['remaining'][self.bestMove['state']['current']]>1:
             if self.lastEvalMode == 'offencive':self.mode = 'strategic'
             elif self.lastEvalMode == 'strategic':self.mode == 'offencive'
             else:self.mode = 'offencive'
