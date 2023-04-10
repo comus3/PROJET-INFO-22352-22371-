@@ -144,7 +144,12 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
                 "gate": gate
                 }
                 tempState = update(state,move)
+                tempRecherche = treasurePos(tempState)
                 newPos = validNewPos(returnPos(tempState),tempState['board'])
+                if tempRecherche in newPos:
+                    move['new_position'] = i
+                    move['state'] = tempState
+                    return [move] 
                 for i in newPos:
                     move['new_position'] = i
                     move['state'] = tempState
