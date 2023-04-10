@@ -416,7 +416,7 @@ class MPST:# Modèle final.
                     xb,yb = index2coords(B)
                     return abs(xb-xa+yb-ya)
                 except:
-                    return 0
+                    return 6
             def iterGates(state):
                 returnList = []
                 for gate in GATES:
