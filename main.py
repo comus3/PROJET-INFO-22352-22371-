@@ -1,6 +1,5 @@
 import random
 from utils import *
-from multiprocessing import Manager
 import time
 import threading
 import queue
@@ -162,7 +161,7 @@ class Random:
             "move": move,
             "message": "I'm random and stupid"
         }
-        time.sleep(1)##############    /!!!!!!\ il faut absolument mettre cette ligne en com pdt le championna sinon on est morts 
+        time.sleep(2)##############    /!!!!!!\ il faut absolument mettre cette ligne en com pdt le championna sinon on est morts 
         return output
     
 
@@ -330,7 +329,7 @@ class NegamaxUltimate:
 class MPST:# Modèle final.
     def __init__(self,state):
         self.state = state
-        self.cuts = 1
+        self.cuts = 2
         self.mode = 'strategic'
         self.bestValue = 0
         self.bestMove = None
@@ -339,6 +338,7 @@ class MPST:# Modèle final.
         self.lastValue = 0
         self.lastEvalMode = self.mode
     def nextMove(self,state,name):
+        start_time = time.time()
         class Tree:
             def __init__(self,value):
                 self.value = value
@@ -498,7 +498,6 @@ class MPST:# Modèle final.
         lock = threading.Lock()
         recherche = treasurePos(state)
         evalThreads = []
-        start_time = time.time()
         self.bestValue = float('-inf')
         self.bestMove = None
         moveList = availableMoves(state)
@@ -517,13 +516,15 @@ class MPST:# Modèle final.
         elapsedTime = time.time()-start_time
         while elapsedTime<2.95:
             elapsedTime = time.time()-start_time
+        self.running = False
         for thread in evalThreads:
-            # thread.join(10)
-            self.running = False
+            thread.join(0.01)
         if self.bestMove == None:
+            print("quoi? Aucun move trouvé? Vite!! call random")
             newModel = Random(state)
             bestMoveRandom = newModel.nextMove(state,name)
-            return bestMoveRandom
+            self.lastEvalMode = "random"
+            return (bestMoveRandom)
         if self.lastValue>self.bestValue and self.mode == 'strategic':
             self.mode = 'defencive'
         elif self.bestMove['state']['remaining'][1-self.bestMove['state']['current']]-self.bestMove['state']['remaining'][self.bestMove['state']['current']]>1:
@@ -538,7 +539,9 @@ class MPST:# Modèle final.
         if self.lastEvalMode == 'offencive':return output(self.bestMove,offenciveMessage)
         elif self.lastEvalMode == 'defencive':return output(self.bestMove,defenciveMessage)
         elif self.lastEvalMode == 'strategic':return output(self.bestMove,strategicMessage)
-        else:return output(self.bestMove)
+        else:
+            print('EEERRRREEEEEUURR DE  MOODEEEE WTFFFF.???? (impossible)           ' + str(self.mode))
+            return output(self.bestMove)
 
 ####################### EMULATEURS JEU  ################################
 
