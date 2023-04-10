@@ -5,7 +5,7 @@ from threading import Thread
 from main import IA#, returnListeIA
 from utils import requestSubscribeStringGenerator,jsonEncode
 import sys
-#hey
+
 portMachine = 3000
 read_Terminal = True
 socketList = []
@@ -18,7 +18,7 @@ def terminal():
     global read_Terminal
     print('terminal ACTIVE')
     while read_Terminal:
-        command_list = ['/connect','/connect -m','/abandon','/exit']
+        command_list = ['/connect','/connect -m','/abandon','/exit','/connect -t']
         user_input = str(input('\n>>'))
         if user_input == command_list[0]:
             read_Terminal = False
@@ -38,6 +38,10 @@ def terminal():
             #    John.kill()
         elif user_input == command_list[3]:
             sys.exit()
+        elif user_input == command_list[4]:
+            modeleTest = str(input('quel modele voulez vous tester?'))
+            connecter(6932,'random')
+            connecter(5932,modeleTest)
         else:
             print('commande non reconnue')
 
