@@ -321,11 +321,11 @@ def negamaxUlt(state,depth=1):#Modifier ici la profondeur, seulement impair!!!
         worst_value = min(worst_value, value)
     return worst_value
 
-def output(move):
+def output(move,message = "Shimi shimi yo"):
         return {
             "response": "move",
             "move": move,
-            "message": "I'm smart but god damn am I slow"
+            "message": message
         }
 
 

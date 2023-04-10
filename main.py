@@ -45,6 +45,9 @@ listeIA = []
 gateList = ["A","B","C","D","E","F","G","H","I","J","K","L"]
 
 smollList = []
+strategicMessage = 'Perfectly balanced, as all things should be'
+offenciveMessage= "you ain't going anywhere son"
+defenciveMessage= 'GO GO GO'
 
 def returnListeIA():
     return listeIA
@@ -532,7 +535,10 @@ class MPST:# Modèle final.
         self.lastValue = self.bestValue
         self.lastMove = self.bestMove
         print('processus de calcul terminé en : ' + str(elapsedTime) +'\n avec un score de :     '+str(self.bestValue))
-        return output(self.bestMove)
+        if self.lastEvalMode == 'offencive':return output(self.bestMove,offenciveMessage)
+        elif self.lastEvalMode == 'defencive':return output(self.bestMove,defenciveMessage)
+        elif self.lastEvalMode == 'strategic':return output(self.bestMove,strategicMessage)
+        else:return output(self.bestMove)
 
 ####################### EMULATEURS JEU  ################################
 
