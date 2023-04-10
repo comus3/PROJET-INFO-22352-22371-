@@ -105,45 +105,21 @@ def whichGates(positions):
     return outPut
 def validNewPos(playerPos,board,newTile = None):#return une liste de nouvelles positions valides sur la carte ENTREE: Player position on board and the board
     validPositions = []
-
-    #J'ai commencé a réécrire cette fonction car il y a de la place pour l'optimisation
-    """
-    if playerPos>6 and board[playerPos]['N']:
-        newPos = playerPos-7
-        if (newPos)in range(49):
-            if board[newPos]['S']:
-                validPositions.append(newPos)
-    if playerPos<42 and board[playerPos]['S']:
-        newPos = playerPos +7
-        if (newPos)in range(49):
-            if board[newPos]['N']:
-                validPositions.append(newPos)
-    if (playerPos%7)!=0 and board[playerPos]['W']:
-        newPos = playerPos -1
-        if (newPos)in range(49):
-            if board[newPos]['E']:
-                validPositions.append(newPos)
-    if ((playerPos+1)%7)!=0 and board[playerPos]['E']:
-        newPos = playerPos +1
-        if (newPos)in range(49):
-            if board[newPos]['W']:
-                validPositions.append(newPos)
-    """
     def recursiveNewPos(exception,playerPos):
-        newTile = stackedTile(playerPos,board)
+        newTileLocal = stackedTile(playerPos,board)
         for cardinal in tuileCouloir:
             if cardinal == exception:
                 continue
-            if newTile[cardinal] and newTile not in stackedExceptionDico[cardinal]:
+            if newTileLocal[cardinal]:
                 if playerPos not in validPositions:
                     validPositions.append(playerPos)
                     recursiveNewPos(cardinal,playerPos+DIRECTIONS[cardinal]['inc'])
     if newTile == None:
         newTile = stackedTile(playerPos,board)
-    for cardinal in tuileCouloir:
-        if newTile[cardinal] and newTile not in stackedExceptionDico[cardinal]:
-            recursiveNewPos(cardinal,playerPos+DIRECTIONS[cardinal]['inc'])
     validPositions.append(playerPos)
+    for cardinal in tuileCouloir:
+        if newTile[cardinal]:
+            recursiveNewPos(DIRECTIONS[cardinal]['opposite'],playerPos+DIRECTIONS[cardinal]['inc'])
     return validPositions
 def treasurePos(status):#return la position du trésor recherché
     target = status['target']
