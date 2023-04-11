@@ -438,7 +438,7 @@ class MPST:# Modèle final.
                     tile = random.randint(0,len(move)-1)
                     if move[tile].returnKids() == []:#if we are done iteratign through all pssibilities with this tile, pop it
                         #pop ici les trucs de tile
-                        move.popKid(tile)
+                        move.pop(tile)
                         bestMoveIndex = bestMoveIndex + 1
                         continue
                     gate = random.randint(0,len(move[tile].returnKids())-1)
