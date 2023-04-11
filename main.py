@@ -493,6 +493,7 @@ class MPST:# Modèle final.
                             self.bestMove = move
                             self.bestValue = score
                         lock.release
+                    else:break
                 self.running = False
 
         
