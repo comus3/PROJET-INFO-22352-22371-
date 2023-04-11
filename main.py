@@ -47,6 +47,7 @@ smollList = []
 strategicMessage = 'Perfectly balanced, as all things should be'
 offenciveMessage= "you ain't going anywhere son"
 defenciveMessage= 'GO GO GO'
+start_time = 0
 
 def returnListeIA():
     return listeIA
@@ -80,6 +81,8 @@ class IA:#create ai and assign its model
         print("je suis l'ia associée au port" + str(self.port) + "  mon nom est : "+ self.name)
 
     def think(self,msg):#call its models method for crezaating a new move
+        global start_time
+        start_time = time.time()
         self.state = msg
         print("message pour "+self.name)
         # print("status:\n"+str(msg))
@@ -337,7 +340,6 @@ class MPST:# Modèle final.
         self.lastValue = 0
         self.lastEvalMode = self.mode
     def nextMove(self,state,name):
-        start_time = time.time()
         class Tree:# class tree is used to create a tree containing all the possibilities to iterit through using MPST
             def __init__(self,value):
                 self.value = value
