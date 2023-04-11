@@ -103,8 +103,7 @@ def whichGates(positions):
             if gate not in outPut:
                 outPut.append(gate)
     return outPut
-
-def validNewPos(state):
+def validNewPos(state):#returns valid positions from player pov
     playerPos = returnPos(state)
     posList = []
     newGraph = transformPath(state,playerPos)
@@ -115,36 +114,15 @@ def validNewPos(state):
         except:
             print('oups! erreur dans la creation de valid new pos.. avec ce id: '+str(node.get_id()))
     return posList
-'''
-def validNewPos(playerPos,board,newTile = None):#return une liste de nouvelles positions valides sur la carte ENTREE: Player position on board and the board
-    
-    validPositions = []
-    def recursiveNewPos(exception,playerPos):
-        validPositions.append(playerPos)
-        newTileLocal = stackedTile(playerPos,board)
-        for cardinal in tuileCouloir:
-            if cardinal == exception:
-                continue
-            if newTileLocal[cardinal]:
-                if (playerPos+DIRECTIONS['cardinal']['inc']) not in validPositions:
-                    recursiveNewPos(cardinal,playerPos+DIRECTIONS[cardinal]['inc'])
-    if newTile == None:
-        newTile = stackedTile(playerPos,board)
-    validPositions.append(playerPos)
-    for cardinal in tuileCouloir:
-        if newTile[cardinal]:
-            recursiveNewPos(DIRECTIONS[cardinal]['opposite'],playerPos+DIRECTIONS[cardinal]['inc'])
-    return validPositions
-'''
 def treasurePos(state):#return la position du trésor recherché
     target = state['target']
     for i in range(49):
         if state['board'][i]['item'] == target:
             return i
     return(90)   
-def returnPos(state):
+def returnPos(state):#returns player pos
     return state['positions'][state['current']]
-def returnEnemyPos(state):
+def returnEnemyPos(state):#returns enemy pos
     return state['positions'][1-state['current']]
 def availableMoves(state):#return les moves possibles pour apres aller itérer dedans
     moves = []
@@ -270,7 +248,7 @@ def evalState(state):#return le poids de la situation
         return 0
     """
     return 0
-def update(state,move):
+def update(state,move):#change la board en fct du move
     newState = copy.deepcopy(state)
     a,b = slideTiles(state['board'],move['tile'],move['gate'])
     newState['board'] = a
@@ -286,7 +264,7 @@ def update(state,move):
         new_positions.append(position)
     newState["positions"] = new_positions
     return newState
-def transformPath(state,debut):
+def transformPath(state,debut):#crée un  graphe de noeuds de positons possibles et associes leurs chemins entre eux 
     board = state['board']
     def recursiveLinks(pos,board,longueur,dir):
         if pos == treasure:
@@ -320,7 +298,7 @@ def transformPath(state,debut):
     g.add_vertex(debut)
     nodes(debut,board)
     return g
-def negamax(negaState, depth):
+def negamax(negaState, depth):#obselette
     if depth == 0:
         return evalState(negaState)
     worst_value = float('inf')
@@ -330,7 +308,7 @@ def negamax(negaState, depth):
         value = negamax(newState, depth - 1)
         worst_value = min(worst_value, value)
     return worst_value + actual_Value
-def stackedTile(pos,board):
+def stackedTile(pos,board):#crée une tuile qui a comme value des pts cardinaux true si on peut passer ou false si on peut pas(false pour n si on est en 0 ou false pour e si e de la tuile actuelle est false OU w de tuile visee est faux)
     newTile = {}
     for cardinal in tuileCouloir:
         if pos in stackedExceptionDico[cardinal]:
@@ -338,35 +316,35 @@ def stackedTile(pos,board):
             continue
         newTile[cardinal] = all([board[pos][cardinal],board[pos+DIRECTIONS[cardinal]['inc']][DIRECTIONS[cardinal]['opposite']]])
     return newTile
-def absoluteDist(A,B):
+def absoluteDist(A,B):#returns absolute distance between two pos
     try:
         xa,ya = index2coords(A)
         xb,yb = index2coords(B)
         return abs(xb-xa+yb-ya)
     except:
         return 6
-def returnDistanceMin(recherche,newPos):
+def returnDistanceMin(recherche,newPos):#returns minimu dist entre list de pos et pos
     distance = 15
     for pos in newPos:
         newDist = absoluteDist(pos,recherche)
         if newDist<distance:
             distance = newDist
     return distance
-def returnPortee(state):
+def returnPortee(state):#returns la portee de l'enemi
     gE = transformPath(state,returnEnemyPos(state))
     dijkstra(gE, gE.get_vertex(returnEnemyPos(state)))
     porteeEnemi = 0
     for i in gE:
         porteeEnemi = porteeEnemi + i.get_distance()
     return porteeEnemi
-def returnPorteeTresor(state):
+def returnPorteeTresor(state):#returns la portee du tresor
     gT = transformPath(state,treasurePos(state))
     dijkstra(gT, gT.get_vertex(treasurePos(state)))
     porteeTres = 0
     for i in gT:
         porteeTres = porteeTres + i.get_distance()
     return porteeTres
-def returnPorteeEco(state):
+def returnPorteeEco(state):#returns la portee de lebnemid de maniere moins precise mais plus econome
     gE = transformPath(state,returnEnemyPos(state))
     porteeEnemi = 0
     for i in gE:

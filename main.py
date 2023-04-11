@@ -54,7 +54,7 @@ def returnListeIA():
 
 ##########################################################################################################  CLASSE  #####################################################################
 
-class IA:
+class IA:#create ai and assign its model
     def __init__(self,modele,name):
         global listeIA
         self.active = True
@@ -79,7 +79,7 @@ class IA:
     def __str__(self):
         print("je suis l'ia associée au port" + str(self.port) + "  mon nom est : "+ self.name)
 
-    def think(self,msg):
+    def think(self,msg):#call its models method for crezaating a new move
         self.state = msg
         print("message pour "+self.name)
         # print("status:\n"+str(msg))
@@ -91,7 +91,7 @@ class IA:
         self.active = False
         
 ####################### MODèLES IA  ################################
-
+#all models below are now obselete
 class Manuel:
     def __init__(self,state):
         self.state = state
@@ -130,7 +130,7 @@ class Manuel:
 class Random:
     def __init__(self,state):
         self.state = state
-    def nextMove(self,state,name):
+    def nextMove(self,state,name):#create a valid move and return it
         tile = random_turn_tile(state['tile'])
         while True:
             gateIndex = random.randint(0,11)
@@ -164,7 +164,7 @@ class Random:
         time.sleep(2)##############    /!!!!!!\ il faut absolument mettre cette ligne en com pdt le championna sinon on est morts 
         return output
     
-
+#all models below are now obselete
 class RDFC:
     def __init__(self,state):
         self.state = state
@@ -324,21 +324,21 @@ class NegamaxUltimate:
                 #     return output(inputList[result_queue.qsize()-1])
         return output(bestMove)
 
-
+#final workjng model is here
 class MPST:# Modèle final.
     def __init__(self,state):
-        self.state = state
-        self.cuts = 1
-        self.mode = 'rush'#here chose first mode
-        self.bestValue = 0
-        self.bestMove = None
-        self.running = False
-        self.lastMove = None
+        self.state = state 
+        self.cuts = 1   #change number of cuts
+        self.mode = 'rush'  #here chose first mode
+        self.bestValue = 0  #init best value at 0
+        self.bestMove = None    #init best move None
+        self.running = False    #start off
+        self.lastMove = None 
         self.lastValue = 0
         self.lastEvalMode = self.mode
     def nextMove(self,state,name):
         start_time = time.time()
-        class Tree:
+        class Tree:# class tree is used to create a tree containing all the possibilities to iterit through using MPST
             def __init__(self,value):
                 self.value = value
                 self.kids = None
@@ -355,24 +355,24 @@ class MPST:# Modèle final.
                 self.kids.pop(index)
             def returnValue(self):
                 return self.value
-        def threadBrains(init):
-            def evalRatata(state):
+        def threadBrains(init):##### target fonction used if mode isnt rush
+            def evalRatata(state):#evaluate fonction used if treasure pos in new pos two moves down the road
                 porteeEnemi = returnPortee(state)
                 return 850-porteeEnemi
-            def evalState(state,newPos):
-                def offenciveEval(state,newPos):
+            def evalState(state,newPos):#eval function
+                def offenciveEval(state,newPos):#objective is to reduce enemy range
                     recherche = treasurePos(state)
                     distance = returnDistanceMin(recherche,newPos)
                     porteeEnemi = returnPortee(state)
                     return 500-porteeEnemi-distance
-                def defenciveEval(state,newPos):
+                def defenciveEval(state,newPos):#objective is to run towards the targe
                     recherche = treasurePos(state)
                     distance = returnDistanceMin(recherche,newPos)
                     if recherche in newPos:
                         return 500-distance
                     else:
                         return 400-distance
-                def strategicEval(state,newPos):
+                def strategicEval(state,newPos):#objective is to get closer to target while preventing enemy from moving freely
                     recherche = treasurePos(state)
                     distance = returnDistanceMin(recherche,newPos)
                     porteeEnemi = returnPortee(state)
@@ -394,14 +394,14 @@ class MPST:# Modèle final.
                     return strategicEval(state,newPos)
                 else:
                     return strategicEval(state,newPos)
-            def iterGates(state):
+            def iterGates(state):#iterate through possible gates to return list of available gates
                 returnList = []
                 for gate in GATES:
                     if GATES[gate]['end'] not in state['positions']:
                         returnList.append(Tree(gate))
                 return returnList
             possibilityTree = []
-            for move in init:
+            for move in init:#iterate through move list to generate MPST. Create tree ojects for eazch possible tile then give a list of gates as kids to all of them
                 state = move['state']
                 temp = []
                 shorTile = {}
@@ -409,52 +409,47 @@ class MPST:# Modèle final.
                 for cardinale in tuileCouloir:#ici j'utilise tuile couloir parceque je veux juste iterer les cardinaux mais on peut faire "plus simple"(je trouve que ca change rien)
                     temp.append(state['tile'][cardinale])
                     shorTile[cardinale] = state['tile'][cardinale]
-                if all(temp) or not any(temp):
+                if all(temp) or not any(temp):#just in case but never called
                     smollPossibilityTree = [Tree(state['tile'])]
                     smollPossibilityTree[0].addKids(iterGates(state))
-                elif isSameTile(shorTile,tuileCouloir):
+                elif isSameTile(shorTile,tuileCouloir):#if free tile is a corridor, only two rotations possible
                     smollPossibilityTree.append(Tree(state['tile']))
                     smollPossibilityTree[0].addKids(iterGates(state))
                     state['tile'] = turn_tile(turn_tile(state['tile']))
                     smollPossibilityTree.append(Tree(state['tile']))
                     smollPossibilityTree[1].addKids(iterGates(state))
-                else:
+                else:#iterate trough 4 tiles(4rotations)
                     for cardinal in tuileCouloir:
                         state['tile'] = turn_tile(state['tile'])
                         smollPossibilityTree.append(Tree(state['tile']))
                         smollPossibilityTree[len(smollPossibilityTree)-1].addKids(iterGates(state))
                 possibilityTree.append(smollPossibilityTree)
 
-            while self.running:
+            while self.running:#this is where we are going to iterate through the MPST
                 bestMoveIndex = 0
                 if possibilityTree == []:
-                    self.running = False
-                for move in possibilityTree:
-                    if move == []:
+                    self.running = False#just to catch a bug where MPST is empty for some reason
+                for move in possibilityTree:#evaluate one of each next move one by one
+                    if move == []:#if MPST for this move is empty, just pass over it
                         bestMoveIndex = bestMoveIndex + 1
                         continue
                     tile = random.randint(0,len(move)-1)
-                    if move[tile].returnKids() == []:
+                    if move[tile].returnKids() == []:#if we are done iteratign through all pssibilities with this tile, pop it
                         #pop ici les trucs de tile
-                        move.pop(tile)
+                        move.popKid(tile)
                         bestMoveIndex = bestMoveIndex + 1
                         continue
                     gate = random.randint(0,len(move[tile].returnKids())-1)
                     gateState = move[tile].returnKids()[gate].returnState()
-                    if gateState == None:
+                    if gateState == None:#it we have not calcuated the state for this gate and tile move, calcilate it and associate it to this move
                         newState = update(init[bestMoveIndex]['state'],{'tile':move[tile].returnValue(),'gate':move[tile].returnKids()[gate].returnValue()})
                         move[tile].returnKids()[gate].addState(newState)
-                    elif gateState == []:
-                        #pop ici les trucs de gate
-                        move[tile].popKid(gate)
-                        bestMoveIndex = bestMoveIndex + 1
-                        continue
-                    if move[tile].returnKids()[gate].returnKids() == None:
+                    if move[tile].returnKids()[gate].returnKids() == None:#if we have not calculated the new possible pos in this state, create them
                         move[tile].returnKids()[gate].addKids(validNewPos(move[tile].returnKids()[gate].returnState()))
                         recherche = treasurePos(move[tile].returnKids()[gate].returnState())
-                        if recherche in move[tile].returnKids()[gate].returnKids():
+                        if recherche in move[tile].returnKids()[gate].returnKids():#if for this move we realise that we can win, evaluate it as a win which is over any other eval
                             evaluated = (evalRatata(move[tile].returnKids()[gate].returnState()),bestMoveIndex)
-                            move[tile].popKid(gate)
+                            move[tile].popKid(gate)#since we can win, all other newpos are stupid so just remove all of them from MPST
                             lock.acquire()
                             if evaluated[0]>self.bestValue:
                                 self.bestValue = evaluated[0]
@@ -462,6 +457,10 @@ class MPST:# Modèle final.
                             lock.release()
                             bestMoveIndex = bestMoveIndex + 1
                             continue
+                    elif move[tile].returnKids()[gate].returnKids() == []:#if we are done iterating through all pssibilities with this gate, pop it
+                        move[tile].popKid(gate)
+                        bestMoveIndex = bestMoveIndex + 1
+                        continue
                     evaluated = (evalState(move[tile].returnKids()[gate].returnState(),move[tile].returnKids()[gate].returnKids()),bestMoveIndex)#tester ici le move gate et pop gate
                     move[tile].popKid(gate)
                     lock.acquire()
@@ -470,8 +469,8 @@ class MPST:# Modèle final.
                         self.bestMove = init[bestMoveIndex]
                     lock.release()
                     bestMoveIndex = bestMoveIndex + 1
-        def threadSmallBrains(init):
-            while self.running:
+        def threadSmallBrains(init):#activated if we want to unstuck the ai
+            while self.running:#objective is to augment the range from treasure pos to maybe create a path towards
                 for move in init:
                     newPos = move['new_position']
                     recherche = treasurePos(move['state'])
@@ -497,39 +496,40 @@ class MPST:# Modèle final.
                 self.running = False
 
         
-        lock = threading.Lock()
+        lock = threading.Lock()#create a lock so threads dont try to use value at smae time
         evalThreads = []
         self.bestValue = float('-inf')
         self.bestMove = None
         moveList = availableMoves(state)
-        if len(moveList) == 1:
+        if len(moveList) == 1:#if available moves returns only one move its bc its a winning move
             return output(moveList[0],'lets fucking go')
         inc = len(moveList)//(self.cuts+1)
         ind = 0
-        self.running = True
-        for cut in range(self.cuts+1):
+        self.running = True#start the thinking proceesss
+        for cut in range(self.cuts+1):#divide the move list into cuts+1 parts 
             next = ind+inc
             section = moveList[ind:next]
             ind = next
             if self.mode == 'rush':
-                evalThread = threading.Thread(target=threadSmallBrains,args=(section,))
+                evalThread = threading.Thread(target=threadSmallBrains,args=(section,))#activate smollbrain with its section
             else:
-                evalThread = threading.Thread(target=threadBrains,args=(section,))
+                evalThread = threading.Thread(target=threadBrains,args=(section,))#activztte big btzain wtih its secion
             evalThreads.append(evalThread)
-        for thread in evalThreads:
+        for thread in evalThreads:#activate al threads
             thread.start()
         elapsedTime = time.time()-start_time
-        while elapsedTime<2.95:
+        while elapsedTime<2.95:#wait until 3 seconds passed
             elapsedTime = time.time()-start_time
-        self.running = False
+        self.running = False#cut off all processes
         # for thread in evalThreads:
         #     thread.join(0.01)
-        if self.bestMove == None:
+        if self.bestMove == None:#catch none error and return random move
             print("quoi? Aucun move trouvé? Vite!! call random")
             newModel = Random(state)
             bestMoveRandom = newModel.nextMove(state,name)
             self.lastEvalMode = "random"
             return (bestMoveRandom)
+        #strategies switching module
         if self.lastValue>(self.bestValue-1) and self.mode == 'strategic':
             self.mode = 'rush'
         elif self.lastEvalMode == 'rush':
