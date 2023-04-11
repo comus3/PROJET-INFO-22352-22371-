@@ -137,7 +137,7 @@ class Random:
             gate = gateList[gateIndex]
             if GATES[gate]['end'] not in state['positions']:
                 break
-        newBoard,newTile = slideTiles(state['board'],tile,gate)
+        state['board'],newTile = slideTiles(state['board'],tile,gate)
         new_positions = []
         for position in state["positions"]:
             if onTrack(position, gate):
@@ -148,7 +148,7 @@ class Random:
                 continue
             new_positions.append(position)
         state["positions"] = new_positions
-        ValidDirections = validNewPos(returnPos(state),newBoard)
+        ValidDirections = validNewPos(state)
         positionIndex = random.randint(0,len(ValidDirections)-1)
         newPosition = ValidDirections[positionIndex]
         move ={
@@ -329,8 +329,8 @@ class NegamaxUltimate:
 class MPST:# Modèle final.
     def __init__(self,state):
         self.state = state
-        self.cuts = 2
-        self.mode = 'strategic'
+        self.cuts = 1
+        self.mode = 'rush'#here chose first mode
         self.bestValue = 0
         self.bestMove = None
         self.running = False
@@ -357,44 +357,29 @@ class MPST:# Modèle final.
             def returnValue(self):
                 return self.value
         def threadBrains(init):
+            def evalRatata(state):
+                porteeEnemi = returnPortee(state)
+                return 850-porteeEnemi
             def evalState(state,newPos):
-                recherche = treasurePos(state)
                 def offenciveEval(state,newPos):
-                    distance = 15
-                    for pos in newPos:
-                        newDist = absoluteDist(pos,recherche)
-                        if newDist<distance:
-                            distance = newDist
-                    gE = transformPath(state['board'],returnEnemyPos(state))
-                    porteeEnemi = 0
-                    for i in gE:
-                        porteeEnemi = porteeEnemi + i.get_distance()
+                    recherche = treasurePos(state)
+                    distance = returnDistanceMin(recherche,newPos)
+                    porteeEnemi = returnPortee(state)
                     return 500-porteeEnemi-distance
                 def defenciveEval(state,newPos):
-                    distance = 15
-                    for pos in newPos:
-                        newDist = absoluteDist(pos,recherche)
-                        if newDist<distance:
-                            distance = newDist
+                    recherche = treasurePos(state)
+                    distance = returnDistanceMin
                     if recherche in newPos:
-                        return 500-newDist
+                        return 500-distance
                     else:
-                        return 400-newDist
-                    return 0
+                        return 400-distance
                 def strategicEval(state,newPos):
-                    gE = transformPath(state['board'],returnEnemyPos(state))
-                    porteeEnemi = 0
-                    for i in gE:
-                        porteeEnemi = porteeEnemi + i.get_distance()
-                    distance = 15
-                    for pos in newPos:
-                        newDist = absoluteDist(pos,recherche)
-                        if newDist<distance:
-                            distance = newDist
-
+                    recherche = treasurePos(state)
+                    distance = returnDistanceMin(recherche,newPos)
+                    porteeEnemi = returnPortee(state)
                     if porteeEnemi>30:
                         if recherche in newPos:
-                            return 300-distance
+                            return 480-distance
                         else:
                             return 100-distance
                     else:
@@ -410,13 +395,6 @@ class MPST:# Modèle final.
                     return strategicEval(state,newPos)
                 else:
                     return strategicEval(state,newPos)
-            def absoluteDist(A,B):
-                try:
-                    xa,ya = index2coords(A)
-                    xb,yb = index2coords(B)
-                    return abs(xb-xa+yb-ya)
-                except:
-                    return 6
             def iterGates(state):
                 returnList = []
                 for gate in GATES:
@@ -424,8 +402,6 @@ class MPST:# Modèle final.
                         returnList.append(Tree(gate))
                 return returnList
             possibilityTree = []
-            self.running = True
-            
             for move in init:
                 state = move['state']
                 temp = []
@@ -465,25 +441,27 @@ class MPST:# Modèle final.
                         bestMoveIndex = bestMoveIndex + 1
                         continue
                     gate = random.randint(0,len(move[tile].returnKids())-1)
-                    if move[tile].returnKids()[gate].returnState() == None:
+                    gateState = move[tile].returnKids()[gate].returnState()
+                    if gateState == None:
                         newState = update(init[bestMoveIndex]['state'],{'tile':move[tile].returnValue(),'gate':move[tile].returnKids()[gate].returnValue()})
                         move[tile].returnKids()[gate].addState(newState)
-                    elif move[tile].returnKids()[gate].returnKids() == []:
+                    elif gateState == []:
                         #pop ici les trucs de gate
                         move[tile].popKid(gate)
                         bestMoveIndex = bestMoveIndex + 1
                         continue
                     if move[tile].returnKids()[gate].returnKids() == None:
-                        move[tile].returnKids()[gate].addKids(validNewPos(returnPos(move[tile].returnKids()[gate].returnState()),move[tile].returnKids()[gate].returnState()['board']))
+                        move[tile].returnKids()[gate].addKids(validNewPos(move[tile].returnKids()[gate].returnState()))
                         recherche = treasurePos(move[tile].returnKids()[gate].returnState())
                         if recherche in move[tile].returnKids()[gate].returnKids():
-                            lock.acquire()
-                            if self.bestValue < 500:
-                                self.bestValue = 500
-                                self.bestMove = init[bestMoveIndex]
-                                self.running = False
-                            lock.release()
+                            evaluated = (evalRatata(move[tile].returnKids()[gate].returnState()),bestMoveIndex)
                             move[tile].popKid(gate)
+                            lock.acquire()
+                            if evaluated[0]>self.bestValue:
+                                self.bestValue = evaluated[0]
+                                self.bestMove = init[bestMoveIndex]
+                            lock.release()
+                            bestMoveIndex = bestMoveIndex + 1
                             continue
                     evaluated = (evalState(move[tile].returnKids()[gate].returnState(),move[tile].returnKids()[gate].returnKids()),bestMoveIndex)#tester ici le move gate et pop gate
                     move[tile].popKid(gate)
@@ -493,23 +471,51 @@ class MPST:# Modèle final.
                         self.bestMove = init[bestMoveIndex]
                     lock.release()
                     bestMoveIndex = bestMoveIndex + 1
+        def threadSmallBrains(init):
+            while self.running:
+                for move in init:
+                    newPos = move['new_position']
+                    recherche = treasurePos(move['state'])
+                    porteeEnemi = returnPortee(state)
+                    distance = absoluteDist(newPos,recherche)
+                    porteeTresor = returnPorteeTresor(state)
+                    if porteeEnemi>30:
+                        if recherche == newPos:
+                            score = 480-distance+porteeTresor
+                        else:
+                            score = 100-distance+porteeTresor
+                    else:
+                        if recherche == newPos:
+                            score = 500-distance+porteeTresor
+                        else:
+                            score = 400-distance+porteeTresor
+                    if self.running:
+                        lock.acquire()
+                        if score>self.bestValue:
+                            self.bestMove = move
+                            self.bestValue = score
+                        lock.release
+                self.running = False
 
         
         lock = threading.Lock()
-        recherche = treasurePos(state)
         evalThreads = []
         self.bestValue = float('-inf')
         self.bestMove = None
         moveList = availableMoves(state)
-        for move in moveList:
-            if move['new_position'] == recherche:return output(move)
+        if len(moveList) == 1:
+            return output(moveList[0],'lets fucking go')
         inc = len(moveList)//(self.cuts+1)
         ind = 0
+        self.running = True
         for cut in range(self.cuts+1):
             next = ind+inc
             section = moveList[ind:next]
             ind = next
-            evalThread = threading.Thread(target=threadBrains,args=(section,))
+            if self.mode == 'rush':
+                evalThread = threading.Thread(target=threadSmallBrains,args=(section,))
+            else:
+                evalThread = threading.Thread(target=threadBrains,args=(section,))
             evalThreads.append(evalThread)
         for thread in evalThreads:
             thread.start()
@@ -517,16 +523,18 @@ class MPST:# Modèle final.
         while elapsedTime<2.95:
             elapsedTime = time.time()-start_time
         self.running = False
-        for thread in evalThreads:
-            thread.join(0.01)
+        # for thread in evalThreads:
+        #     thread.join(0.01)
         if self.bestMove == None:
             print("quoi? Aucun move trouvé? Vite!! call random")
             newModel = Random(state)
             bestMoveRandom = newModel.nextMove(state,name)
             self.lastEvalMode = "random"
             return (bestMoveRandom)
-        if self.lastValue>self.bestValue and self.mode == 'strategic':
-            self.mode = 'defencive'
+        if self.lastValue>(self.bestValue-1) and self.mode == 'strategic':
+            self.mode = 'rush'
+        elif self.lastEvalMode == 'rush':
+            self.mode = 'strategic'
         elif self.bestMove['state']['remaining'][1-self.bestMove['state']['current']]-self.bestMove['state']['remaining'][self.bestMove['state']['current']]>1:
             if self.lastEvalMode == 'offencive':self.mode = 'strategic'
             elif self.lastEvalMode == 'strategic':self.mode == 'offencive'
@@ -539,6 +547,7 @@ class MPST:# Modèle final.
         if self.lastEvalMode == 'offencive':return output(self.bestMove,offenciveMessage)
         elif self.lastEvalMode == 'defencive':return output(self.bestMove,defenciveMessage)
         elif self.lastEvalMode == 'strategic':return output(self.bestMove,strategicMessage)
+        elif self.lastEvalMode == 'rush':return output(self.bestMove,"I need to pee so let's end this fast")
         else:
             print('EEERRRREEEEEUURR DE  MOODEEEE WTFFFF.???? (impossible)           ' + str(self.mode))
             return output(self.bestMove)
