@@ -505,7 +505,7 @@ class MPST:# Modèle final.
         self.bestMove = None
         moveList = availableMoves(state)
         if len(moveList) == 1:#if available moves returns only one move its bc its a winning move
-            return output(moveList[0],'lets fucking go')
+            return output(moveList[0],"don't mind if I do")
         inc = len(moveList)//(self.cuts+1)
         ind = 0
         self.running = True#start the thinking proceesss
@@ -521,7 +521,7 @@ class MPST:# Modèle final.
         for thread in evalThreads:#activate al threads
             thread.start()
         elapsedTime = time.time()-start_time
-        while elapsedTime<2.95:#wait until 3 seconds passed
+        while elapsedTime<2.9:#wait until 3 seconds passed
             elapsedTime = time.time()-start_time
         self.running = False#cut off all processes
         # for thread in evalThreads:
