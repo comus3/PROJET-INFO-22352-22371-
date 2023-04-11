@@ -540,6 +540,8 @@ class MPST:# Modèle final.
             elif self.lastEvalMode == 'strategic':self.mode == 'offencive'
             else:self.mode = 'offencive'
         else: self.mode = 'strategic'
+        if self.lastMove==self.bestMove:
+            self.mode = 'random'
         self.lastEvalMode = self.mode
         self.lastValue = self.bestValue
         self.lastMove = self.bestMove
