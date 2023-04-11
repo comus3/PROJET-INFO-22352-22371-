@@ -323,7 +323,6 @@ class NegamaxUltimate:
                 # if bestValue == 1000:
                 #     return output(inputList[result_queue.qsize()-1])
         return output(bestMove)
-                        
 
 
 class MPST:# Modèle final.
@@ -368,7 +367,7 @@ class MPST:# Modèle final.
                     return 500-porteeEnemi-distance
                 def defenciveEval(state,newPos):
                     recherche = treasurePos(state)
-                    distance = returnDistanceMin
+                    distance = returnDistanceMin(recherche,newPos)
                     if recherche in newPos:
                         return 500-distance
                     else:
@@ -381,12 +380,12 @@ class MPST:# Modèle final.
                         if recherche in newPos:
                             return 480-distance
                         else:
-                            return 100-distance
+                            return 420-(2*distance)-porteeEnemi
                     else:
                         if recherche in newPos:
                             return 500-distance
                         else:
-                            return 400-distance
+                            return 400-(2*distance)
                 if self.mode == 'offencive':
                     return offenciveEval(state,newPos)
                 elif self.mode == 'defencive':
