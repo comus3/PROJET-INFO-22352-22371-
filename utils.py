@@ -103,16 +103,30 @@ def whichGates(positions):
             if gate not in outPut:
                 outPut.append(gate)
     return outPut
+
+def validNewPos(state):
+    playerPos = returnPos(state)
+    posList = []
+    newGraph = transformPath(state,playerPos)
+    for node in newGraph:
+        try:
+            nodeId = int(node.get_id())
+            posList.append(nodeId)
+        except:
+            print('oups! erreur dans la creation de valid new pos.. avec ce id: '+str(node.get_id()))
+    return posList
+'''
 def validNewPos(playerPos,board,newTile = None):#return une liste de nouvelles positions valides sur la carte ENTREE: Player position on board and the board
+    
     validPositions = []
     def recursiveNewPos(exception,playerPos):
+        validPositions.append(playerPos)
         newTileLocal = stackedTile(playerPos,board)
         for cardinal in tuileCouloir:
             if cardinal == exception:
                 continue
             if newTileLocal[cardinal]:
-                if playerPos not in validPositions:
-                    validPositions.append(playerPos)
+                if (playerPos+DIRECTIONS['cardinal']['inc']) not in validPositions:
                     recursiveNewPos(cardinal,playerPos+DIRECTIONS[cardinal]['inc'])
     if newTile == None:
         newTile = stackedTile(playerPos,board)
@@ -121,22 +135,23 @@ def validNewPos(playerPos,board,newTile = None):#return une liste de nouvelles p
         if newTile[cardinal]:
             recursiveNewPos(DIRECTIONS[cardinal]['opposite'],playerPos+DIRECTIONS[cardinal]['inc'])
     return validPositions
-def treasurePos(status):#return la position du trésor recherché
-    target = status['target']
+'''
+def treasurePos(state):#return la position du trésor recherché
+    target = state['target']
     for i in range(49):
-        if status['board'][i]['item'] == target:
-            return int(i)
+        if state['board'][i]['item'] == target:
+            return i
     return(90)   
-def returnPos(status):
-    return status['positions'][status['current']]
-def returnEnemyPos(status):
-    return status['positions'][1-status['current']]
+def returnPos(state):
+    return state['positions'][state['current']]
+def returnEnemyPos(state):
+    return state['positions'][1-state['current']]
 def availableMoves(state):#return les moves possibles pour apres aller itérer dedans
     moves = []
     temp = []
     shorTile = {}
-    newPos = validNewPos(returnPos(state),state['board'])
-    def iterGates(state,newPos):
+    def iterGates(state):
+        newMoves = []
         for gate in GATES:
             if GATES[gate]['end'] not in state['positions']:
                 move ={
@@ -144,30 +159,45 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
                 "gate": gate
                 }
                 tempState = update(state,move)
-                tempRecherche = treasurePos(tempState)
-                newPos = validNewPos(returnPos(tempState),tempState['board'])
-                if tempRecherche in newPos:
-                    move['new_position'] = i
-                    move['state'] = tempState
-                    return [move] 
+                newPos = validNewPos(tempState)
                 for i in newPos:
                     move['new_position'] = i
                     move['state'] = tempState
+                    move['state']['positions'][move['state']['current']] = i
+                    if tempState['board'][i]['item']==tempState['target']:
+                        return [move]
                     res = copy.deepcopy(move)
-                    moves.append(res)
+                    newMoves.append(res)
+        return newMoves
     for cardinale in tuileCouloir:#ici j'utilise tuile couloir parceque je veux juste iterer les cardinaux mais on peut faire "plus simple"(je trouve que ca change rien)
         temp.append(state['tile'][cardinale])
         shorTile[cardinale] = state['tile'][cardinale]
     if all(temp) or not any(temp):
-        iterGates(state,newPos)
+        newMoves = iterGates(state)
+        if len(newMoves)==1:
+            return [newMoves[0]]
+        for elem in newMoves:
+            moves.append(elem)
     elif isSameTile(shorTile,tuileCouloir):
-        iterGates(state,newPos)
+        newMoves = iterGates(state)
+        if len(newMoves)==1:
+            return [newMoves[0]]
+        for elem in newMoves:
+            moves.append(elem)
         state['tile'] = turn_tile(turn_tile(state['tile']))
-        iterGates(state,newPos)
+        newMoves = iterGates(state)
+        if len(newMoves)==1:
+            return [newMoves[0]]
+        for elem in newMoves:
+            moves.append(elem)
     else:
         for cardinal in tuileCouloir:
             state['tile'] = turn_tile(state['tile'])
-            iterGates(state,newPos)
+            newMoves = iterGates(state)
+            if len(newMoves)==1:
+                return [newMoves[0]]
+            for elem in newMoves:
+                moves.append(elem)
     return moves
 def evalState(state):#return le poids de la situation
     #ANCIENNE VERSION DU CALCUL DE POIDS MAINTENANT OBSCELETTE
@@ -256,31 +286,28 @@ def update(state,move):
         new_positions.append(position)
     newState["positions"] = new_positions
     return newState
-def transformPath(board,debut):
+def transformPath(state,debut):
+    board = state['board']
     def recursiveLinks(pos,board,longueur,dir):
-        if pos == treasurePos:
+        if pos == treasure:
             return (pos,longueur,DIRECTIONS[dir]['opposite'])
         stacked = stackedTile(pos,board)
         if not stacked[dir]:
             return (pos,longueur,DIRECTIONS[dir]['opposite'])
         else:
             if not(stacked[DIRECTIONS[dir]['sides'][0]] and stacked[DIRECTIONS[dir]['sides'][1]]):
-                newPos = pos +DIRECTIONS[dir]['inc']##############/!\   MODIF
-                if newPos in validNewPos(pos,board,stacked):
-                    return recursiveLinks(newPos,board,longueur+1,dir)
-                else:
-                    return (pos,longueur,DIRECTIONS[dir]['opposite'])
+                newPos = pos +DIRECTIONS[dir]['inc']
+                return recursiveLinks(newPos,board,longueur+1,dir)
             else:
                 return (pos,longueur,DIRECTIONS[dir]['opposite'])
     def nodes(pos,board,exception=None):
         stacked = stackedTile(pos,board)
-        validNewPositions = validNewPos(pos,board,stacked)
         for card in tuileCouloir:
             if card == exception:
                 continue
             if stacked[card]:
                 newPos = pos +DIRECTIONS[card]['inc']
-                if newPos in validNewPositions:
+                if newPos in range(49):
                     a,b,c = recursiveLinks(newPos,board,1,card)
                     if a not in g.vert_dict:
                         g.add_vertex(a)
@@ -288,7 +315,7 @@ def transformPath(board,debut):
                         nodes(a,board,c)
                     else:
                         g.add_edge(pos,a,b)
-    treasure = treasurePos
+    treasure = treasurePos(state)
     g = Graph()
     g.add_vertex(debut)
     nodes(debut,board)
@@ -311,6 +338,41 @@ def stackedTile(pos,board):
             continue
         newTile[cardinal] = all([board[pos][cardinal],board[pos+DIRECTIONS[cardinal]['inc']][DIRECTIONS[cardinal]['opposite']]])
     return newTile
+def absoluteDist(A,B):
+    try:
+        xa,ya = index2coords(A)
+        xb,yb = index2coords(B)
+        return abs(xb-xa+yb-ya)
+    except:
+        return 6
+def returnDistanceMin(recherche,newPos):
+    distance = 15
+    for pos in newPos:
+        newDist = absoluteDist(pos,recherche)
+        if newDist<distance:
+            distance = newDist
+    return distance
+def returnPortee(state):
+    gE = transformPath(state,returnEnemyPos(state))
+    dijkstra(gE, gE.get_vertex(returnEnemyPos(state)))
+    porteeEnemi = 0
+    for i in gE:
+        porteeEnemi = porteeEnemi + i.get_distance()
+    return porteeEnemi
+def returnPorteeTresor(state):
+    gT = transformPath(state,treasurePos(state))
+    dijkstra(gT, gT.get_vertex(treasurePos(state)))
+    porteeTres = 0
+    for i in gT:
+        porteeTres = porteeTres + i.get_distance()
+    return porteeTres
+def returnPorteeEco(state):
+    gE = transformPath(state,returnEnemyPos(state))
+    porteeEnemi = 0
+    for i in gE:
+        porteeEnemi = porteeEnemi + 1
+    return porteeEnemi
+
 
 ####         /*\--/*\   NEGAMAX ULTIMATE    \0/_\0/
 # cQuestion pr pfro: comment faire pr alpha bracketying ou je sais plus quoi prq deja un locj existaant au debut
