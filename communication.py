@@ -40,8 +40,8 @@ def terminal():
             sys.exit()
         elif user_input == command_list[4]:
             modeleTest = str(input('quel modele voulez vous tester?'))
-            connecter(6932,'random')
-            connecter(5932,modeleTest)
+            connecter(6432,'random')
+            connecter(5232,modeleTest)
         else:
             print('commande non reconnue')
 
