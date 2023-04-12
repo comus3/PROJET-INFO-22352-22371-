@@ -366,28 +366,19 @@ class MPST:# Modèle final.
                     recherche = treasurePos(state)
                     distance = returnDistanceMin(recherche,newPos)
                     porteeEnemi = returnPortee(state)
-                    return 500-porteeEnemi-distance
+                    return 450-porteeEnemi-distance
                 def defenciveEval(state,newPos):#objective is to run towards the targe
                     recherche = treasurePos(state)
                     distance = returnDistanceMin(recherche,newPos)
-                    if recherche in newPos:
-                        return 500-distance
-                    else:
-                        return 400-distance
+                    return 400-distance
                 def strategicEval(state,newPos):#objective is to get closer to target while preventing enemy from moving freely
                     recherche = treasurePos(state)
                     distance = returnDistanceMin(recherche,newPos)
                     porteeEnemi = returnPortee(state)
                     if porteeEnemi>30:
-                        if recherche in newPos:
-                            return 480-distance
-                        else:
-                            return 420-(2*distance)-porteeEnemi
+                        return 420-(2*distance)-porteeEnemi
                     else:
-                        if recherche in newPos:
-                            return 500-distance
-                        else:
-                            return 400-(2*distance)
+                        return 400-(2*distance)
                 if self.mode == 'offencive':
                     return offenciveEval(state,newPos)
                 elif self.mode == 'defencive':
