@@ -5,6 +5,22 @@ import threading
 import queue
 
 
+# Questiions ppour lur le jour de la rentree
+
+
+# pourqoi dist vaut 0 parfois??
+
+# pourquoi smallbraiin thread ne meurt pas?
+
+# est ce que il a fait une ia ? 
+ 
+# tests unitaires?.
+
+#quand un match se termine, kill ia ou la laisser vivante pr les martch suivants
+
+#quel msg le serveur envoie quand on a gagner?
+
+
 # ### ---FAIT---    ######CREER CLASSE QUI VA CREER DES OBJETS IA, CHAQUE OBJET IA A UN ATRIBUT Active LES OBJETS SAPPELLLENT IA ET SONT RANGES DANS UNE LISTE
 # aussi un attribut socket qui est son socket
 # chaque objet ia possede uun attribut modèle qui pinte vers la fonction a utiliser pour calculer le next move
@@ -12,7 +28,6 @@ import queue
 # negamax qui marche
 # MPST
 # ### ---A FAIRE--- ######
-# debut
 
 
 GATES = {
@@ -485,7 +500,7 @@ class MPST:# Modèle final.
                         if score>self.bestValue:
                             self.bestMove = move
                             self.bestValue = score
-                        lock.release
+                        lock.release()
                     else:break
                 self.running = False
 
