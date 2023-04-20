@@ -74,6 +74,19 @@ def connecter(port,modele):
     s.close()
     print("error no ok response from server")
 
+def receiveJSON(client):
+    ok = False
+    chunks = []
+    data = None
+    while not ok:
+        chunks.append(client.recv(2048))
+        try:
+            data = json.loads(b''.join(chunks).decode())
+            ok = True
+        except json.decoder.JSONDecodeError:
+            pass
+    return data
+
 def life(ia,port):#################################################1) Ecouter 2) JOUeR 3) parler 4) recommence:
     global read_Terminal
     with socket.socket() as s:
@@ -84,7 +97,8 @@ def life(ia,port):#################################################1) Ecouter 2)
             try:
                 client, address = s.accept()
                 with client:
-                    msg = json.loads(client.recv(20048).decode())
+                    #data = client.recv(20048).decode()
+                    msg = receiveJSON(client)
                     print("message reçu!... Qu'en faire?")
                     if msg["request"] == "play":
                         read_Terminal = False
@@ -104,7 +118,9 @@ def life(ia,port):#################################################1) Ecouter 2)
  
 #################################################################       ACTOIN      #############################################
 #adress = str(input("Entrez l'adresse i.p. du serveur:   "))
-adress = "localhost"
+adress = "172.17.10.59"
 terminal_Thread = Thread(target=terminal)
 terminal_Thread.start()
+
+
 
