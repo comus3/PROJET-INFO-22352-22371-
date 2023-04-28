@@ -18,7 +18,7 @@ def terminal():
     global read_Terminal
     print('terminal ACTIVE')
     while read_Terminal:
-        command_list = ['/connect','/connect -m','/abandon','/exit','/connect -t']
+        command_list = ['/connect','/connect -m','/abandon','/exit','/connect -t','/connect -c']
         user_input = str(input('\n>>'))
         if user_input == command_list[0]:
             read_Terminal = False
@@ -42,6 +42,9 @@ def terminal():
             modeleTest = str(input('quel modele voulez vous tester?'))
             connecter(6432,'random')
             connecter(5232,modeleTest)
+        elif user_input == command_list[5]:
+            adress = str(input('alors, cest le grand jour?\nquelle est ladresse du serv? :  >>'))
+            connecter(7120,'MPST')  
         else:
             print('commande non reconnue')
 
@@ -118,7 +121,7 @@ def life(ia,port):#################################################1) Ecouter 2)
  
 #################################################################       ACTOIN      #############################################
 #adress = str(input("Entrez l'adresse i.p. du serveur:   "))
-adress = "172.17.10.59"
+adress = "localhost"
 terminal_Thread = Thread(target=terminal)
 terminal_Thread.start()
 
