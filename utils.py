@@ -131,21 +131,21 @@ def availableMoves(state):#return les moves possibles pour apres aller itérer d
     def iterGates(state):
         newMoves = []
         for gate in GATES:
-            if GATES[gate]['end'] not in state['positions']:
-                move ={
-                "tile": state['tile'],
-                "gate": gate
-                }
-                tempState = update(state,move)
-                newPos = validNewPos(tempState)
-                for i in newPos:
-                    move['new_position'] = i
-                    move['state'] = tempState
-                    move['state']['positions'][move['state']['current']] = i
-                    if tempState['board'][i]['item']==tempState['target']:
-                        return [move]
-                    res = copy.deepcopy(move)
-                    newMoves.append(res)
+            # if GATES[gate]['end'] not in state['positions']:
+            move ={
+            "tile": state['tile'],
+            "gate": gate
+            }
+            tempState = update(state,move)
+            newPos = validNewPos(tempState)
+            for i in newPos:
+                move['new_position'] = i
+                move['state'] = tempState
+                move['state']['positions'][move['state']['current']] = i
+                if tempState['board'][i]['item']==tempState['target']:
+                    return [move]
+                res = copy.deepcopy(move)
+                newMoves.append(res)
         return newMoves
     for cardinale in tuileCouloir:#ici j'utilise tuile couloir parceque je veux juste iterer les cardinaux mais on peut faire "plus simple"(je trouve que ca change rien)
         temp.append(state['tile'][cardinale])
