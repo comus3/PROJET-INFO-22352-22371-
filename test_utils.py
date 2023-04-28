@@ -21,4 +21,4 @@ def test_IA_valid():
     nwpi = IA("nwpi","nwpi")
     final = IA('MPST','MPST')
     for ia in listeIA:
-        assert ia.think(stateOfExample) 
+        assert ia.think(stateOfExample)
