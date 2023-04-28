@@ -504,6 +504,9 @@ class MPST:# Modèle final.
         self.bestMove = None
         moveList = availableMoves(state)
         if len(moveList) == 1:#if available moves returns only one move its bc its a winning move
+            self.lastValue = 300
+            self.lastEvalMode = "strategic"
+            self.lastMove = moveList[0]
             return output(moveList[0],"don't mind if I do")
         inc = len(moveList)//(self.cuts+1)
         ind = 0
@@ -536,15 +539,16 @@ class MPST:# Modèle final.
             self.mode = 'rush'
         elif self.lastEvalMode == 'rush':
             self.mode = 'strategic'
-        elif self.bestMove['state']['remaining'][1-self.bestMove['state']['current']]-self.bestMove['state']['remaining'][self.bestMove['state']['current']]>1:
+        if self.bestMove['state']['remaining'][1-self.bestMove['state']['current']]-self.bestMove['state']['remaining'][self.bestMove['state']['current']]>1:
             if self.lastEvalMode == 'offencive':self.mode = 'strategic'
             elif self.lastEvalMode == 'strategic':self.mode == 'offencive'
             else:self.mode = 'offencive'
-        else: self.mode = 'strategic'
         if self.lastMove==self.bestMove:
             self.mode = 'random'
+        if self.lastEvalMode != 'rush':
+            self.lastValue = self.bestValue
+        else: self.lastValue = 450
         self.lastEvalMode = self.mode
-        self.lastValue = self.bestValue
         self.lastMove = self.bestMove
         print('processus de calcul terminé en : ' + str(elapsedTime) +'\n avec un score de :     '+str(self.bestValue))
         if self.lastEvalMode == 'offencive':return output(self.bestMove,offenciveMessage)
