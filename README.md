@@ -46,7 +46,7 @@ Notre système d'Intelligence Artificielle (IA) a été implémenté en utilisan
 
 Pour résoudre ce problème, notre IA a été conçue pour créer une liste de tous les mouvements possibles et leurs états associés pour notre joueur. En suite, pour chaque mouvement, un objet "Tree" est créé,, qui contient des attributs "value" et "kids". Ces mouvements sont représentés sous forme d'arbre où le premier niveau contient une tuile, chacune de ces tuiles contenant des "kids" qui sont des "gates", et chacune des "gates" ne ne possédant pas encore de "kids" car il faudrait calculer les nouveaux etats pour connaitres les positions possibles.
 
-Ce processus se fait en parallelisme, la liste de moves est divisée en un nombre de cuts prédéfiinis.
+Ce processus est exécuté en parallèle, la liste de mouvements étant divisée en un nombre de "cuts" prédéfinies.
 
 Notre IA va ensuite itérer jusqu'à ce que 3 secondes se sont ecoulées parmi les moves disponibles pour notre joueur et dans chaqun de ces moves il va aller evaluer un état au hasard parmi les moves possibles. à ce moment là il va donc calculer l'état correspondant à ce move et trouver les nouvelles positions disponibles et les associer comme kids à la gate en question.
 
