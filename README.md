@@ -48,16 +48,17 @@ Pour résoudre ce problème, notre IA a été conçue pour créer une liste de t
 
 Ce processus est exécuté en parallèle, la liste de mouvements étant divisée en un nombre de "cuts" prédéfinies.
 
-Notre IA va ensuite itérer jusqu'à ce que 3 secondes se sont ecoulées parmi les moves disponibles pour notre joueur et dans chaqun de ces moves il va aller evaluer un état au hasard parmi les moves possibles. à ce moment là il va donc calculer l'état correspondant à ce move et trouver les nouvelles positions disponibles et les associer comme kids à la gate en question.
+Notre IA itère ensuite jusqu'à ce que 3 secondes se soient écoulées, en évaluant aléatoirement les états disponibles pour chaque mouvement du joueur.  À ce moment, l'IA calcule l'état correspondant à ce mouvement, trouve les nouvelles positions disponibles, et les associe comme "kids" à la "gate" en question.
 
-Tous les threads se partangent une valeur best value et une valeur best move et après 3 secondes ils sont tous arêtés et l'ia return bestMove.
 
-Pour ce qui est de la fonction d'évaluation, nous avons développé une stratégie complexe; il y a trois modes:
+Tous les threads se partangent une valeur "best value" et une valeur "best move". Après 3 secondes, ils sont tous arêtés, et l'IA retourne "bestMove".
+
+Concernant la fonction d'évaluation, nous avons développé une stratégie complexe avec trois modes : 
 -stratégique,
 -rush,
 -offencif,
 -défencif.
-En fonction de la progression de la partie, l'ia va passer d'une évaluation à l'autre.
+En fonction de la progression de la partie, l'IA va passer d'une évaluation à l'autre.
 1. En mode offencif, le but est de réduire la portée de l'énemi au maximum
 2. En mode defencif, le but est de réduire la distance entre notre joueur et le tresor
 3. En mode rush, le but est aussi de réduire la distance entre notre joueur et le tresor mais aussi augmenter la portée du tresor
