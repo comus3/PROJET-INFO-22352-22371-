@@ -42,8 +42,7 @@ Les commandes disponibles sont:
 
 ## Spécifications techniques
 
-Notre système d'IA a été implémenté en utilisant le langage de programmation Python 3.0. 
-Nous avons adopté l'algorithme MPST(du moins une variante). Le principe est que nous avons observé que le fait de créer un arbre de profondeur 2 ou 3 contenant les états actualisés ainsi que les nouvelles positions possibles consommait déjà baucoup de ressources.
+Notre système d'Intelligence Artificielle (IA) a été implémenté en utilisant le langage de programmation Python 3.0, et nous avons adopté l'algorithme MPST(du moins une variante). Le principe est que nous avons observé que le fait de créer un arbre de profondeur 2 ou 3 contenant les états actualisés ainsi que les nouvelles positions possibles consommait déjà baucoup de ressources.
 
  Pour contrer ce problème, notre IA commence par créer une liste de tous les moves possibles et leurs états associés pour notre joueur. En suite, il crée pour chaque move un objet Tree qui possede les attributs value et kids. Ces moves sont représentés sous forme d'arbre qui au premier etage contient une tuile, chaqune de ces tuiles contient des kids qui sont des gates et chaqune des gates ne possede pas encore de kids car il faudrait calculer les nouveaux etats pour connaitres les positions possibles.
 
