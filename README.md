@@ -6,7 +6,7 @@ Ce projet a été réalisé par :
  - Zekhnini Ayoub  (22371)
 ## Introduction
 
-Ce projet a pour but de créer une intelligence artificielle pour le jeu du Labyrinthe. L'objectif final est de participer à un championnat organisé entre toutes les IA du laboratoire. Pour cela, chaque IA doit communiquer avec un serveur central dont le code est disponible sur ce repository [ici](https://github.com/qlurkin/PI2CChampionshipRunner).
+Ce projet a pour but de créer une intelligence artificielle pour le jeu du Labyrinthe. L'objectif final est de participer à un championnat organisé entre toutes les IA du laboratoire. Pour cela, chaque IA doit communiquer avec un serveur central dont le code est disponible sur [ce repository](https://github.com/qlurkin/PI2CChampionshipRunner).
 
 ## Fonctionnalités
 
@@ -36,26 +36,50 @@ Les commandes disponibles sont:
 
 - /connect (permet de connecter une IA)
 - /connect -m (permet de connecter plusieurs IA à la fois)
+- /connect -t (permet de tester une IA)
+- /kill (termine tous les processus)
 - /exit (ferme le programme)
 
 ## Spécifications techniques
 
 Notre système d'IA a été implémenté en utilisant le langage de programmation Python 3.0. 
-Nous avons adopté l'algorithme Negamax, une variante de l'algorithme Minimax, pour déterminer le prochain mouvement optimal.
-Pour ce faire, il crée un graphe à partir de l'état en entrée et utilise l'algorithme de Dijkstra pour trouver le chemin le plus court entre la position actuelle et le trésor. 
-Cette méthode permet de déterminer de façon efficace le poids de chaque mouvement potentiel, garantissant une décision optimale pour le prochain coup à jouer.
+Nous avons adopté l'algorithme MPST(du moins une variante). Le principe est que nous avons observé que le fait de créer un arbre de profondeur 2 ou 3 contenant les états actualisés ainsi que les nouvelles positions possibles consommait déjà baucoup de ressources.
 
-Dans les cas où l'algorithme ne parvient pas à trouver un chemin menant au trésor, que ce soit pour notre programme ou pour son adversaire, notre programme adopte une stratégie différente. Il cherche alors à se rapprocher de son propre trésor dans l'espoir d'augmenter ses chances de victoire. Cette approche permet d'optimiser les chances de gagner, même dans des situations difficiles où la découverte du trésor adverse semble improbable..
+ Pour contrer ce problème, notre IA commence par créer une liste de tous les moves possibles et leurs états associés pour notre joueur. En suite, il crée pour chaque move un objet Tree qui possede les attributs value et kids. Ces moves sont représentés sous forme d'arbre qui au premier etage contient une tuile, chaqune de ces tuiles contient des kids qui sont des gates et chaqune des gates ne possede pas encore de kids car il faudrait calculer les nouveaux etats pour connaitres les positions possibles.
+
+Ce processus se fait en parallelisme, la liste de moves est divisée en un nombre de cuts prédéfiinis.
+
+Notre IA va ensuite itérer jusqu'à ce que 3 secondes se sont ecoulées parmi les moves disponibles pour notre joueur et dans chaqun de ces moves il va aller evaluer un état au hasard parmi les moves possibles. à ce moment là il va donc calculer l'état correspondant à ce move et trouver les nouvelles positions disponibles et les associer comme kids à la gate en question.
+
+Tous les threads se partangent une valeur best value et une valeur best move et après 3 secondes ils sont tous arêtés et l'ia return bestMove.
+
+Pour ce qui est de la fonction d'évaluation, nous avons développé une stratégie complexe; il y a trois modes:
+-stratégique,
+-rush,
+-offencif,
+-défencif.
+En fonction de la progression de la partie, l'ia va passer d'une évaluation à l'autre.
+1. En mode offencif, le but est de réduire la portée de l'énemi au maximum
+2. En mode defencif, le but est de réduire la distance entre notre joueur et le tresor
+3. En mode rush, le but est aussi de réduire la distance entre notre joueur et le tresor mais aussi augmenter la portée du tresor
+4. En mode stratégique, l'ia essaye de faire un equilibre entre tous les modes ci-dessus
 
 ## Bibliothèques Utilisées
 
 Nous avons utilisé plusieurs bibliothèques pour développer notre IA, notamment :
+-Socket
+-Json
+-Copy
+-Random
+-Dijkstra
+-Time
+-Threading
+-Queue
+-Pytest
 
 
 ## Conclusion
 En conclusion, ce projet a été une opportunité pour nous de développer une intelligence artificielle efficace pour le jeu du Labyrinthe. Nous avons utilisé les meilleures pratiques de programmation ainsi que les bibliothèques les plus avancées pour créer une IA qui est capable de recevoir les informations sur l'état du plateau de jeu, d'analyser ces informations, de calculer la prochaine action à effectuer et enfin d'envoyer cette action à l'application gérant les parties.
-
-Pour utiliser notre IA, il vous suffit de cloner notre repository et d'installer les dépendances nécessaires. Nous avons également fourni des commandes pour faciliter son utilisation. Pour plus d'informations sur le développement de notre IA, vous pouvez consulter notre repository.
 
 ## Informations supplémentaires
 
